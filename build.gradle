@@ -11,11 +11,12 @@ repositories {
 }
 
 dependencies {
-    implementation 'org.ow2.asm:asm:9.7'
-    implementation 'org.ow2.asm:asm-tree:9.7'
-    implementation 'org.ow2.asm:asm-analysis:9.7'
-    implementation 'org.ow2.asm:asm-commons:9.7'
-    implementation 'org.ow2.asm:asm-util:9.7'
+    implementation platform('org.ow2.asm:asm-bom:9.11.1')
+    implementation 'org.ow2.asm:asm'
+    implementation 'org.ow2.asm:asm-tree'
+    implementation 'org.ow2.asm:asm-analysis'
+    implementation 'org.ow2.asm:asm-commons'
+    implementation 'org.ow2.asm:asm-util'
     implementation 'org.tukaani:xz:1.10'
     implementation 'com.eclipsesource.minimal-json:minimal-json:0.9.5'
     implementation 'org.bouncycastle:bcprov-jdk15on:1.70'
