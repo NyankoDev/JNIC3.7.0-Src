@@ -371,6 +371,7 @@ public final class Jnic {
          }
 
          reader.accept(visitor, 0);
+         plan.addDynamicHelpers(reader, classNode);
          outputClasses.add(classNode);
       }
 

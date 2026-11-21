@@ -1,5 +1,6 @@
 package dev.jnic.archive;
 
+import dev.jnic.bytecode.DynamicConstantPool;
 import dev.jnic.logging.JnicLogger;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -9,7 +10,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
-import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.tree.ClassNode;
 
 public class OutputArchive {
@@ -33,9 +33,7 @@ public class OutputArchive {
             }
 
             ClassNode classNode = (ClassNode)classValue;
-            ClassWriter writer = new ClassWriter(1);
-            classNode.accept(writer);
-            this.writeEntry(classNode.name + ".class", writer.toByteArray(), zipOutputStream);
+            this.writeEntry(classNode.name + ".class", DynamicConstantPool.write(classNode), zipOutputStream);
          }
 
          for (Object resourceEntryValue : resources.entrySet()) {

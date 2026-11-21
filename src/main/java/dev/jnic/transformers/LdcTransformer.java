@@ -36,7 +36,7 @@ public class LdcTransformer extends OpcodeTransformer {
       } else if (value instanceof Double) {
          return 'd';
       } else if (value instanceof ConstantDynamic) {
-         throw new IllegalArgumentException("ConstantDynamic not supported");
+         throw new IllegalStateException("Dynamic constants must be lowered before native translation");
       } else {
          throw new AssertionError("ldc of " + value);
       }

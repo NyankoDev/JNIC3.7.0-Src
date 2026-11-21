@@ -2,11 +2,13 @@ package dev.jnic.compiler;
 
 import dev.jnic.Jnic;
 import dev.jnic.archive.InputArchive;
+import dev.jnic.bytecode.DynamicConstantLowering;
 import dev.jnic.bytecode.TranslatedMethodIndex;
 import dev.jnic.config.JnicConfig;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
 import org.objectweb.asm.ClassReader;
@@ -17,6 +19,7 @@ public class CompilationPlan {
    private final JnicConfig config;
    private final Map<ClassNode, List<MethodNode>> methods = new HashMap<>();
    private final TranslatedMethodIndex translatedMethods = new TranslatedMethodIndex();
+   private final Map<ClassReader, List<MethodNode>> dynamicHelpers = new IdentityHashMap<>();
    private static final String EVALUATION_EDITION = "evaluation";
 
    public CompilationPlan(InputArchive inputArchive, JnicConfig config) {
@@ -25,8 +28,8 @@ public class CompilationPlan {
 
       for (ClassReader reader : inputArchive.getClasses()) {
          ClassNode classNode = new ClassNode();
-         reader.accept(classNode, 2);
-         ArrayList selectedMethods = new ArrayList();
+         reader.accept(classNode, ClassReader.SKIP_DEBUG);
+         List<MethodNode> selectedMethods = new ArrayList<>();
 
          for (MethodNode methodNode : classNode.methods) {
             if (config.isIncluded(classNode, methodNode)) {
@@ -39,6 +42,7 @@ public class CompilationPlan {
          }
 
          if (!selectedMethods.isEmpty()) {
+            this.dynamicHelpers.put(reader, DynamicConstantLowering.lower(classNode, selectedMethods));
             this.methods.put(classNode, selectedMethods);
             if (evaluationMode) {
                break;
@@ -57,5 +61,9 @@ public class CompilationPlan {
 
    public TranslatedMethodIndex getTranslatedMethods() {
       return this.translatedMethods;
+   }
+
+   public void addDynamicHelpers(ClassReader reader, ClassNode outputClass) {
+      outputClass.methods.addAll(this.dynamicHelpers.getOrDefault(reader, Collections.emptyList()));
    }
 }
