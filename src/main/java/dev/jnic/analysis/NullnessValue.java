@@ -42,6 +42,6 @@ public enum NullnessValue implements Value {
    }
 
    static {
-      NullnessValue[] var8 = new NullnessValue[]{NULL, NOT_NULL, UNKNOWN1, UNKNOWN2};
+      NullnessValue[] nullnessValues = new NullnessValue[]{NULL, NOT_NULL, UNKNOWN1, UNKNOWN2};
    }
 }

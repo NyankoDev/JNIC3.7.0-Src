@@ -17,15 +17,15 @@ public class InputArchive {
    private final Collection<ClassReader> classes = new ArrayDeque<>();
    private final Map<String, byte[]> resources = new HashMap<>();
 
-   public InputArchive(String text) throws IOException {
-      try (JarFile var8 = new JarFile(new File(text))) {
-         Enumeration var9 = var8.entries();
+   public InputArchive(String fileName) throws IOException {
+      try (JarFile archive = new JarFile(new File(fileName))) {
+         Enumeration entries = archive.entries();
 
-         while (var9.hasMoreElements()) {
-            JarEntry var10 = (JarEntry)var9.nextElement();
-            byte[] var11 = new byte[(int)var10.getSize()];
-            new DataInputStream(var8.getInputStream(var10)).readFully(var11);
-            this.acceptEntry(var10, var11);
+         while (entries.hasMoreElements()) {
+            JarEntry entry = (JarEntry)entries.nextElement();
+            byte[] entryBytes = new byte[(int)entry.getSize()];
+            new DataInputStream(archive.getInputStream(entry)).readFully(entryBytes);
+            this.acceptEntry(entry, entryBytes);
          }
       }
    }

@@ -33,24 +33,24 @@ class NullnessInterpreter extends Interpreter<NullnessValue> {
    }
 
    public NullnessValue newOperation(AbstractInsnNode instruction) throws AnalyzerException {
-      int var2 = instruction.getOpcode();
-      if (var2 > 167) {
-         if (var2 == 168) {
-            String var3 = UNSUPPORTED_MESSAGE;
-            throw new AnalyzerException(instruction, var3);
-         } else if (var2 == 178) {
+      int opcode = instruction.getOpcode();
+      if (opcode > 167) {
+         if (opcode == 168) {
+            String unsupportedMessage = UNSUPPORTED_MESSAGE;
+            throw new AnalyzerException(instruction, unsupportedMessage);
+         } else if (opcode == 178) {
             return NullnessValue.unknownValue(Type.getType(((FieldInsnNode)instruction).desc));
-         } else if (var2 != 187) {
+         } else if (opcode != 187) {
             throw new AssertionError();
          } else {
             return NullnessValue.NOT_NULL;
          }
       } else {
-         if (Integer.compareUnsigned(var2 - 1, 17) > 0) {
+         if (Integer.compareUnsigned(opcode - 1, 17) > 0) {
             throw new AssertionError();
          }
 
-         switch (var2 - 1) {
+         switch (opcode - 1) {
             case 0:
                return NullnessValue.NULL;
             case 1:
@@ -67,18 +67,18 @@ class NullnessInterpreter extends Interpreter<NullnessValue> {
             case 16:
                break;
             case 17:
-               Object var4 = ((LdcInsnNode)instruction).cst;
-               if (var4 == null) {
+               Object constant = ((LdcInsnNode)instruction).cst;
+               if (constant == null) {
                   break;
                }
 
-               if ((var4 == null ? true : var4 instanceof String)
-                  || (var4 == null ? true : var4 instanceof Type)
-                  || (var4 == null ? true : var4 instanceof Handle)) {
+               if ((constant == null ? true : constant instanceof String)
+                  || (constant == null ? true : constant instanceof Type)
+                  || (constant == null ? true : constant instanceof Handle)) {
                   return NullnessValue.NOT_NULL;
                }
 
-               if ((var4 == null ? false : !(var4 instanceof Double)) && (var4 == null ? false : !(var4 instanceof Long))) {
+               if ((constant == null ? false : !(constant instanceof Double)) && (constant == null ? false : !(constant instanceof Long))) {
                   break;
                }
             case 8:

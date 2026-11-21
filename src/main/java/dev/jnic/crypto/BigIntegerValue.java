@@ -105,27 +105,27 @@ public final class BigIntegerValue {
    }
 
    public BigIntegerValue add(BigIntegerValue bigIntegerValue) {
-      BigInteger var2 = this.asBigInteger();
-      BigInteger var3;
-      return wrapResult(var2.add(var3 = bigIntegerValue.asBigInteger()), var2, this, var3, bigIntegerValue);
+      BigInteger leftOperand = this.asBigInteger();
+      BigInteger rightOperand;
+      return wrapResult(leftOperand.add(rightOperand = bigIntegerValue.asBigInteger()), leftOperand, this, rightOperand, bigIntegerValue);
    }
 
    public BigIntegerValue subtract(BigIntegerValue bigIntegerValue) {
-      BigInteger var2 = this.asBigInteger();
-      BigInteger var3;
-      return wrapResult(var2.subtract(var3 = bigIntegerValue.asBigInteger()), var2, this, var3, bigIntegerValue);
+      BigInteger leftOperand = this.asBigInteger();
+      BigInteger rightOperand;
+      return wrapResult(leftOperand.subtract(rightOperand = bigIntegerValue.asBigInteger()), leftOperand, this, rightOperand, bigIntegerValue);
    }
 
    public BigIntegerValue multiply(BigIntegerValue bigIntegerValue) {
-      BigInteger var2 = this.asBigInteger();
-      BigInteger var3;
-      return wrapResult(var2.multiply(var3 = bigIntegerValue.asBigInteger()), var2, this, var3, bigIntegerValue);
+      BigInteger leftOperand = this.asBigInteger();
+      BigInteger rightOperand;
+      return wrapResult(leftOperand.multiply(rightOperand = bigIntegerValue.asBigInteger()), leftOperand, this, rightOperand, bigIntegerValue);
    }
 
    public BigIntegerValue divide(BigIntegerValue bigIntegerValue) {
-      BigInteger var2 = this.asBigInteger();
-      BigInteger var3;
-      return wrapResult(var2.divide(var3 = bigIntegerValue.asBigInteger()), var2, this, var3, bigIntegerValue);
+      BigInteger leftOperand = this.asBigInteger();
+      BigInteger rightOperand;
+      return wrapResult(leftOperand.divide(rightOperand = bigIntegerValue.asBigInteger()), leftOperand, this, rightOperand, bigIntegerValue);
    }
 
    public BigIntegerValue[] divideAndRemainder(BigIntegerValue bigIntegerValue) {
@@ -133,30 +133,30 @@ public final class BigIntegerValue {
    }
 
    public BigIntegerValue remainder(BigIntegerValue bigIntegerValue) {
-      BigInteger var2 = this.asBigInteger();
-      BigInteger var3;
-      return wrapResult(var2.remainder(var3 = bigIntegerValue.asBigInteger()), var2, this, var3, bigIntegerValue);
+      BigInteger leftOperand = this.asBigInteger();
+      BigInteger rightOperand;
+      return wrapResult(leftOperand.remainder(rightOperand = bigIntegerValue.asBigInteger()), leftOperand, this, rightOperand, bigIntegerValue);
    }
 
    public BigIntegerValue pow(int index) {
-      BigInteger var2 = this.asBigInteger();
-      return wrapResult(var2.pow(index), var2, this, null, null);
+      BigInteger leftOperand = this.asBigInteger();
+      return wrapResult(leftOperand.pow(index), leftOperand, this, null, null);
    }
 
    public BigIntegerValue gcd(BigIntegerValue bigIntegerValue) {
-      BigInteger var2 = this.asBigInteger();
-      BigInteger var3;
-      return wrapResult(var2.gcd(var3 = bigIntegerValue.asBigInteger()), var2, this, var3, bigIntegerValue);
+      BigInteger leftOperand = this.asBigInteger();
+      BigInteger rightOperand;
+      return wrapResult(leftOperand.gcd(rightOperand = bigIntegerValue.asBigInteger()), leftOperand, this, rightOperand, bigIntegerValue);
    }
 
    public BigIntegerValue abs() {
-      BigInteger var1 = this.asBigInteger();
-      return wrapResult(var1.abs(), var1, this, null, null);
+      BigInteger leftOperand = this.asBigInteger();
+      return wrapResult(leftOperand.abs(), leftOperand, this, null, null);
    }
 
    public BigIntegerValue negate() {
-      BigInteger var1 = this.asBigInteger();
-      return wrapResult(var1.negate(), var1, this, null, null);
+      BigInteger leftOperand = this.asBigInteger();
+      return wrapResult(leftOperand.negate(), leftOperand, this, null, null);
    }
 
    public int signum() {
@@ -164,60 +164,60 @@ public final class BigIntegerValue {
    }
 
    public BigIntegerValue mod(BigIntegerValue bigIntegerValue) {
-      BigInteger var2 = this.asBigInteger();
-      BigInteger var3;
-      return wrapResult(var2.mod(var3 = bigIntegerValue.asBigInteger()), var2, this, var3, bigIntegerValue);
+      BigInteger leftOperand = this.asBigInteger();
+      BigInteger rightOperand;
+      return wrapResult(leftOperand.mod(rightOperand = bigIntegerValue.asBigInteger()), leftOperand, this, rightOperand, bigIntegerValue);
    }
 
    public BigIntegerValue modPow(BigIntegerValue bigIntegerValue, BigIntegerValue bigIntegerValue2) {
-      BigInteger var3 = this.asBigInteger();
-      BigInteger var4;
-      return wrapResult(var3.modPow(var4 = bigIntegerValue.asBigInteger(), bigIntegerValue2.asBigInteger()), var3, this, var4, bigIntegerValue);
+      BigInteger leftOperand = this.asBigInteger();
+      BigInteger rightOperand;
+      return wrapResult(leftOperand.modPow(rightOperand = bigIntegerValue.asBigInteger(), bigIntegerValue2.asBigInteger()), leftOperand, this, rightOperand, bigIntegerValue);
    }
 
    public BigIntegerValue modInverse(BigIntegerValue bigIntegerValue) {
-      BigInteger var2 = this.asBigInteger();
-      BigInteger var3;
-      return wrapResult(var2.modInverse(var3 = bigIntegerValue.asBigInteger()), var2, this, var3, bigIntegerValue);
+      BigInteger leftOperand = this.asBigInteger();
+      BigInteger rightOperand;
+      return wrapResult(leftOperand.modInverse(rightOperand = bigIntegerValue.asBigInteger()), leftOperand, this, rightOperand, bigIntegerValue);
    }
 
    public BigIntegerValue shiftLeft(int index) {
-      BigInteger var2 = this.asBigInteger();
-      return wrapResult(var2.shiftLeft(index), var2, this, null, null);
+      BigInteger leftOperand = this.asBigInteger();
+      return wrapResult(leftOperand.shiftLeft(index), leftOperand, this, null, null);
    }
 
    public BigIntegerValue shiftRight(int index) {
-      BigInteger var2 = this.asBigInteger();
-      return wrapResult(var2.shiftRight(index), var2, this, null, null);
+      BigInteger leftOperand = this.asBigInteger();
+      return wrapResult(leftOperand.shiftRight(index), leftOperand, this, null, null);
    }
 
    public BigIntegerValue and(BigIntegerValue bigIntegerValue) {
-      BigInteger var2 = this.asBigInteger();
-      BigInteger var3;
-      return wrapResult(var2.and(var3 = bigIntegerValue.asBigInteger()), var2, this, var3, bigIntegerValue);
+      BigInteger leftOperand = this.asBigInteger();
+      BigInteger rightOperand;
+      return wrapResult(leftOperand.and(rightOperand = bigIntegerValue.asBigInteger()), leftOperand, this, rightOperand, bigIntegerValue);
    }
 
    public BigIntegerValue or(BigIntegerValue bigIntegerValue) {
-      BigInteger var2 = this.asBigInteger();
-      BigInteger var3;
-      return wrapResult(var2.or(var3 = bigIntegerValue.asBigInteger()), var2, this, var3, bigIntegerValue);
+      BigInteger leftOperand = this.asBigInteger();
+      BigInteger rightOperand;
+      return wrapResult(leftOperand.or(rightOperand = bigIntegerValue.asBigInteger()), leftOperand, this, rightOperand, bigIntegerValue);
    }
 
    public BigIntegerValue xor(BigIntegerValue bigIntegerValue) {
-      BigInteger var2 = this.asBigInteger();
-      BigInteger var3;
-      return wrapResult(var2.xor(var3 = bigIntegerValue.asBigInteger()), var2, this, var3, bigIntegerValue);
+      BigInteger leftOperand = this.asBigInteger();
+      BigInteger rightOperand;
+      return wrapResult(leftOperand.xor(rightOperand = bigIntegerValue.asBigInteger()), leftOperand, this, rightOperand, bigIntegerValue);
    }
 
    public BigIntegerValue not() {
-      BigInteger var1 = this.asBigInteger();
-      return wrapResult(var1.not(), var1, this, null, null);
+      BigInteger leftOperand = this.asBigInteger();
+      return wrapResult(leftOperand.not(), leftOperand, this, null, null);
    }
 
    public BigIntegerValue andNot(BigIntegerValue bigIntegerValue) {
-      BigInteger var2 = this.asBigInteger();
-      BigInteger var3;
-      return wrapResult(var2.andNot(var3 = bigIntegerValue.asBigInteger()), var2, this, var3, bigIntegerValue);
+      BigInteger leftOperand = this.asBigInteger();
+      BigInteger rightOperand;
+      return wrapResult(leftOperand.andNot(rightOperand = bigIntegerValue.asBigInteger()), leftOperand, this, rightOperand, bigIntegerValue);
    }
 
    public boolean testBit(int index) {
@@ -225,18 +225,18 @@ public final class BigIntegerValue {
    }
 
    public BigIntegerValue setBit(int bit) {
-      BigInteger var2 = this.asBigInteger();
-      return wrapResult(var2.setBit(bit), var2, this, null, null);
+      BigInteger leftOperand = this.asBigInteger();
+      return wrapResult(leftOperand.setBit(bit), leftOperand, this, null, null);
    }
 
    public BigIntegerValue clearBit(int index) {
-      BigInteger var2 = this.asBigInteger();
-      return wrapResult(var2.clearBit(index), var2, this, null, null);
+      BigInteger leftOperand = this.asBigInteger();
+      return wrapResult(leftOperand.clearBit(index), leftOperand, this, null, null);
    }
 
    public BigIntegerValue flipBit(int index) {
-      BigInteger var2 = this.asBigInteger();
-      return wrapResult(var2.flipBit(index), var2, this, null, null);
+      BigInteger leftOperand = this.asBigInteger();
+      return wrapResult(leftOperand.flipBit(index), leftOperand, this, null, null);
    }
 
    public int getLowestSetBit() {
@@ -256,15 +256,15 @@ public final class BigIntegerValue {
    }
 
    public BigIntegerValue min(BigIntegerValue bigIntegerValue) {
-      BigInteger var2 = this.asBigInteger();
-      BigInteger var3;
-      return wrapResult(var2.min(var3 = bigIntegerValue.asBigInteger()), var2, this, var3, bigIntegerValue);
+      BigInteger leftOperand = this.asBigInteger();
+      BigInteger rightOperand;
+      return wrapResult(leftOperand.min(rightOperand = bigIntegerValue.asBigInteger()), leftOperand, this, rightOperand, bigIntegerValue);
    }
 
    public BigIntegerValue max(BigIntegerValue bigIntegerValue) {
-      BigInteger var2 = this.asBigInteger();
-      BigInteger var3;
-      return wrapResult(var2.max(var3 = bigIntegerValue.asBigInteger()), var2, this, var3, bigIntegerValue);
+      BigInteger leftOperand = this.asBigInteger();
+      BigInteger rightOperand;
+      return wrapResult(leftOperand.max(rightOperand = bigIntegerValue.asBigInteger()), leftOperand, this, rightOperand, bigIntegerValue);
    }
 
    @Override

@@ -28,10 +28,10 @@ public class OperandStack {
    }
 
    public String referenceTypeBefore(int index) {
-      BasicValue var6 = this.before.getStack(index);
-      BasicValue var8 = BasicValue.REFERENCE_VALUE;
-      if (var6 != var8) {
-         return !var6.isReference() ? null : var6.getType().getInternalName();
+      BasicValue stackValue = this.before.getStack(index);
+      BasicValue referenceValue = BasicValue.REFERENCE_VALUE;
+      if (stackValue != referenceValue) {
+         return !stackValue.isReference() ? null : stackValue.getType().getInternalName();
       } else {
          return null;
       }

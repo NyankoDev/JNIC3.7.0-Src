@@ -13,34 +13,34 @@ public class ConversionTransformer extends OpcodeTransformer {
    }
 
    static String castPrefix(Type type) {
-      String value1 = JniTypes.nativeType(type);
-      return "(" + value1 + ") ";
+      String nativeType = JniTypes.nativeType(type);
+      return "(" + nativeType + ") ";
    }
 
    @Override
    public String transform(CompilationContext context, AbstractInsnNode instruction, OperandStack stack, JumpEmitter jumps, String ownerName) {
-      int var6 = instruction.getOpcode();
-      if (var6 >= 133 && var6 <= 147) {
-         int var7 = stack.sizeBefore() - 1;
-         char var8 = "iiijjjfffdddiii".charAt(var6 - 133);
-         char var9 = "jfdifdijdijfiii".charAt(var6 - 133);
-         String var10 = "stack" + var7 + "." + var8;
-         String var11 = "stack" + var7 + "." + var9;
-         String var10000;
-         switch (var6) {
+      int opcode = instruction.getOpcode();
+      if (opcode >= 133 && opcode <= 147) {
+         int topStackIndex = stack.sizeBefore() - 1;
+         char character = "iiijjjfffdddiii".charAt(opcode - 133);
+         char character2 = "jfdifdijdijfiii".charAt(opcode - 133);
+         String expression = "stack" + topStackIndex + "." + character;
+         String expression2 = "stack" + topStackIndex + "." + character2;
+         String literalText;
+         switch (opcode) {
             case 145:
-               var10000 = "jbyte";
+               literalText = "jbyte";
                break;
             case 146:
-               var10000 = "jchar";
+               literalText = "jchar";
                break;
             case 147:
-               var10000 = "jshort";
+               literalText = "jshort";
                break;
             default:
-               switch (var9) {
+               switch (character2) {
                   case 'd':
-                     var10000 = "jdouble";
+                     literalText = "jdouble";
                      break;
                   case 'e':
                   case 'g':
@@ -48,43 +48,43 @@ public class ConversionTransformer extends OpcodeTransformer {
                   default:
                      throw new AssertionError();
                   case 'f':
-                     var10000 = "jfloat";
+                     literalText = "jfloat";
                      break;
                   case 'i':
-                     var10000 = "jint";
+                     literalText = "jint";
                      break;
                   case 'j':
-                     var10000 = "jlong";
+                     literalText = "jlong";
                }
          }
 
-         String value12 = var10000;
-         if ((var8 == 'f' || var8 == 'd') && (var9 == 'i' || var9 == 'j')) {
-            boolean var13 = var9 == 'j';
-            String value14 = var13 ? "0x1p63" : "0x1p31";
-            String value15 = var13 ? "9223372036854775807LL" : "2147483647";
-            return var11
+         String literalText2 = literalText;
+         if ((character == 'f' || character == 'd') && (character2 == 'i' || character2 == 'j')) {
+            boolean matches = character2 == 'j';
+            String literalText3 = matches ? "0x1p63" : "0x1p31";
+            String literalText4 = matches ? "9223372036854775807LL" : "2147483647";
+            return expression2
                + " = isnan("
-               + var10
+               + expression
                + ") ? 0 : "
-               + var10
+               + expression
                + " >= "
-               + value14
+               + literalText3
                + " ? "
-               + value15
+               + literalText4
                + " : "
-               + var10
+               + expression
                + " <= -"
-               + value14
+               + literalText3
                + " ? (-"
-               + value15
+               + literalText4
                + " - 1) : ("
-               + value12
+               + literalText2
                + ") "
-               + var10
+               + expression
                + ";\n";
          } else {
-            return var11 + " = (" + value12 + ") " + var10 + ";\n";
+            return expression2 + " = (" + literalText2 + ") " + expression + ";\n";
          }
       } else {
          throw new AssertionError();

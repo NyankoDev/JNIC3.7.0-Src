@@ -20,39 +20,39 @@ public class FieldTransformer extends OpcodeTransformer {
          throw new ClassCastException("");
       }
 
-      FieldInsnNode var6 = (FieldInsnNode)instruction;
-      Type var7 = Type.getType(var6.desc);
-      int var8 = stack.sizeBefore();
-      int var9 = stack.sizeBefore();
-      int var10 = stack.sizeBefore();
-      if (var6.owner.startsWith("dev/jnic/")) {
-         if (var6.name == null) {
+      FieldInsnNode fieldInstruction = (FieldInsnNode)instruction;
+      Type type = Type.getType(fieldInstruction.desc);
+      int stackSizeBefore = stack.sizeBefore();
+      int stackSizeBefore2 = stack.sizeBefore();
+      int stackSizeBefore3 = stack.sizeBefore();
+      if (fieldInstruction.owner.startsWith("dev/jnic/")) {
+         if (fieldInstruction.name == null) {
             throw new NullPointerException("");
          }
 
-         if (var6.name.equals("$jnicEnabled") && var6.desc.equals("Z")) {
+         if (fieldInstruction.name.equals("$jnicEnabled") && fieldInstruction.desc.equals("Z")) {
             JnicLogger.INSTANCE.debug("Replaced $jnicEnabled access in " + ownerName);
-            return JniTypes.stackVariable("stack", var10, var7) + " = 1;\n";
+            return JniTypes.stackVariable("stack", stackSizeBefore3, type) + " = 1;\n";
          }
       }
 
       switch (instruction.getOpcode()) {
          case 178:
-            return JniTypes.stackVariable("stack", var10, var7) + " = " + context.readStaticField(var6.owner, var6.name, var6.desc) + ";\n";
+            return JniTypes.stackVariable("stack", stackSizeBefore3, type) + " = " + context.readStaticField(fieldInstruction.owner, fieldInstruction.name, fieldInstruction.desc) + ";\n";
          case 179:
-            return context.writeStaticField(var6.owner, var6.name, var6.desc, JniTypes.stackVariable("stack", var9 - 1, var7)) + ";\n";
+            return context.writeStaticField(fieldInstruction.owner, fieldInstruction.name, fieldInstruction.desc, JniTypes.stackVariable("stack", stackSizeBefore2 - 1, type)) + ";\n";
          case 180:
-            return JniTypes.stackVariable("stack", var9 - 1, var7)
+            return JniTypes.stackVariable("stack", stackSizeBefore2 - 1, type)
                + " = "
-               + context.readField(var6.owner, var6.name, var6.desc, JniTypes.stackVariable("stack", var9 - 1, Type.getObjectType("java/lang/Object")))
+               + context.readField(fieldInstruction.owner, fieldInstruction.name, fieldInstruction.desc, JniTypes.stackVariable("stack", stackSizeBefore2 - 1, Type.getObjectType("java/lang/Object")))
                + ";\n";
          case 181:
             return context.writeField(
-                  var6.owner,
-                  var6.name,
-                  var6.desc,
-                  JniTypes.stackVariable("stack", var8 - 2, Type.getObjectType("java/lang/Object")),
-                  JniTypes.stackVariable("stack", var9 - 1, var7)
+                  fieldInstruction.owner,
+                  fieldInstruction.name,
+                  fieldInstruction.desc,
+                  JniTypes.stackVariable("stack", stackSizeBefore - 2, Type.getObjectType("java/lang/Object")),
+                  JniTypes.stackVariable("stack", stackSizeBefore2 - 1, type)
                )
                + ";\n";
          default:

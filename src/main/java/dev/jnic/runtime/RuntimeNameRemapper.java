@@ -15,36 +15,36 @@ public class RuntimeNameRemapper extends Remapper {
    }
 
    @Override
-   public String map(String text) {
-      if (text.startsWith("org/tukaani/xz/")) {
-         Map var2 = this.names;
-         Function<String, String> function5 = textx -> {
-            String var2x;
+   public String map(String internalName) {
+      if (internalName.startsWith("org/tukaani/xz/")) {
+         Map names2 = this.names;
+         Function<String, String> mapper = textx -> {
+            String candidateName;
             do {
-               var2x = this.runtimePackage + "/" + randomName(1);
-            } while (this.names.containsValue(var2x));
+               candidateName = this.runtimePackage + "/" + randomName(1);
+            } while (this.names.containsValue(candidateName));
 
-            return var2x;
+            return candidateName;
          };
-         String var4 = (String)var2.computeIfAbsent((String)text, function5);
-         this.names.put(var4, (String)text);
-         return var4;
+         String mappedName = (String)names2.computeIfAbsent((String)internalName, mapper);
+         this.names.put(mappedName, (String)internalName);
+         return mappedName;
       } else {
-         return text;
+         return internalName;
       }
    }
 
-   public String originalName(String text) {
-      return this.names.getOrDefault(text, (String)text);
+   public String originalName(String mappedName) {
+      return this.names.getOrDefault(mappedName, (String)mappedName);
    }
 
    public static String randomName(int index) {
-      StringBuilder var1 = new StringBuilder(index);
+      StringBuilder builder = new StringBuilder(index);
 
-      for (int var2 = 0; var2 < index; var2++) {
-         var1.append("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz".charAt(ThreadLocalRandom.current().nextInt(52)));
+      for (int index2 = 0; index2 < index; index2++) {
+         builder.append("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz".charAt(ThreadLocalRandom.current().nextInt(52)));
       }
 
-      return var1.toString();
+      return builder.toString();
    }
 }

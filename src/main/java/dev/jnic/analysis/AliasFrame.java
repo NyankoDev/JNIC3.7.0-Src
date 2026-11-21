@@ -28,8 +28,8 @@ public class AliasFrame<V extends Value> extends Frame<V> {
    }
 
    V peek(int index) {
-      int var2 = this.getStackSize();
-      return this.getStack(var2 + ~index);
+      int stackSize = this.getStackSize();
+      return this.getStack(stackSize + ~index);
    }
 
    int topSlot() {
@@ -41,16 +41,16 @@ public class AliasFrame<V extends Value> extends Frame<V> {
          return this.getLocal(index);
       }
 
-      int var3 = this.getLocals();
-      return this.getStack(index - var3);
+      int localCount = this.getLocals();
+      return this.getStack(index - localCount);
    }
 
    void setSlot(int index, Value value) {
       if (this.getLocals() > index) {
          this.setLocal(index, (V)value);
       } else {
-         int var5 = this.getLocals();
-         this.setStack(index - var5, (V)value);
+         int localCount = this.getLocals();
+         this.setStack(index - localCount, (V)value);
       }
    }
 
@@ -59,16 +59,16 @@ public class AliasFrame<V extends Value> extends Frame<V> {
          return this.aliases[index];
       }
 
-      AliasSet var5 = AliasSet.singleton(index);
-      this.aliases[index] = var5;
-      return var5;
+      AliasSet aliasGroup = AliasSet.singleton(index);
+      this.aliases[index] = aliasGroup;
+      return aliasGroup;
    }
 
    private void copyAlias(int index, int index2) {
       this.clearAlias(index);
-      AliasSet var3 = this.aliasSet(index2);
-      var3.add(index);
-      this.aliases[index] = var3;
+      AliasSet aliasGroup = this.aliasSet(index2);
+      aliasGroup.add(index);
+      this.aliases[index] = aliasGroup;
    }
 
    private void clearAlias(int index) {
@@ -89,19 +89,19 @@ public class AliasFrame<V extends Value> extends Frame<V> {
 
    @Override
    public void execute(AbstractInsnNode instruction, Interpreter interpreter) throws AnalyzerException {
-      int var3;
-      int var4;
+      int topSlot;
+      int topSlot2;
       label77: {
-         var3 = this.topSlot();
+         topSlot = this.topSlot();
          super.execute(instruction, interpreter);
-         var4 = this.topSlot();
+         topSlot2 = this.topSlot();
          switch (instruction.getOpcode()) {
             case 21:
             case 22:
             case 23:
             case 24:
             case 25:
-               this.copyAlias(var4, ((VarInsnNode)instruction).var);
+               this.copyAlias(topSlot2, ((VarInsnNode)instruction).var);
                break label77;
             case 26:
             case 27:
@@ -219,8 +219,8 @@ public class AliasFrame<V extends Value> extends Frame<V> {
             case 196:
             case 197:
             default:
-               if (var4 <= var3) {
-                  this.clearAlias(var4);
+               if (topSlot2 <= topSlot) {
+                  this.clearAlias(topSlot2);
                }
                break label77;
             case 54:
@@ -228,16 +228,16 @@ public class AliasFrame<V extends Value> extends Frame<V> {
             case 56:
             case 57:
             case 58:
-               int var5 = ((VarInsnNode)instruction).var;
-               this.copyAlias(var5, var3);
-               if (this.getLocal(var5).getSize() == 2) {
-                  this.clearAlias(var5 + 1);
+               int localIndex = ((VarInsnNode)instruction).var;
+               this.copyAlias(localIndex, topSlot);
+               if (this.getLocal(localIndex).getSize() == 2) {
+                  this.clearAlias(localIndex + 1);
                }
 
-               if (var5 > 0) {
-                  Value var6 = this.getLocal(var5 - 1);
-                  if (var6 != null && var6.getSize() == 2) {
-                     this.clearAlias(var5 - 1);
+               if (localIndex > 0) {
+                  Value localValue = this.getLocal(localIndex - 1);
+                  if (localValue != null && localValue.getSize() == 2) {
+                     this.clearAlias(localIndex - 1);
                   }
                }
             case 79:
@@ -284,67 +284,67 @@ public class AliasFrame<V extends Value> extends Frame<V> {
                break label77;
             case 92:
                if (this.peek(0).getSize() != 2) {
-                  this.copyAlias(var4 - 1, var4 - 3);
-                  this.copyAlias(var4, var4 - 2);
+                  this.copyAlias(topSlot2 - 1, topSlot2 - 3);
+                  this.copyAlias(topSlot2, topSlot2 - 2);
                   break label77;
                }
             case 89:
-               this.copyAlias(var4, var4 - 1);
+               this.copyAlias(topSlot2, topSlot2 - 1);
                break label77;
             case 93:
                if (this.peek(0).getSize() != 2) {
-                  this.copyAlias(var4, var4 - 2);
-                  this.copyAlias(var4 - 1, var4 - 3);
-                  this.copyAlias(var4 - 2, var4 - 4);
-                  this.copyAlias(var4 - 4, var4);
-                  this.copyAlias(var4 - 5, var4 - 1);
+                  this.copyAlias(topSlot2, topSlot2 - 2);
+                  this.copyAlias(topSlot2 - 1, topSlot2 - 3);
+                  this.copyAlias(topSlot2 - 2, topSlot2 - 4);
+                  this.copyAlias(topSlot2 - 4, topSlot2);
+                  this.copyAlias(topSlot2 - 5, topSlot2 - 1);
                   break label77;
                }
             case 90:
-               this.copyAlias(var4, var4 - 1);
-               this.copyAlias(var4 - 1, var4 - 2);
-               this.copyAlias(var4 - 2, var4);
+               this.copyAlias(topSlot2, topSlot2 - 1);
+               this.copyAlias(topSlot2 - 1, topSlot2 - 2);
+               this.copyAlias(topSlot2 - 2, topSlot2);
                break label77;
             case 94:
                if (this.peek(0).getSize() != 2) {
-                  this.copyAlias(var4, var4 - 2);
-                  this.copyAlias(var4 - 1, var4 - 3);
-                  this.copyAlias(var4 - 2, var4 - 4);
+                  this.copyAlias(topSlot2, topSlot2 - 2);
+                  this.copyAlias(topSlot2 - 1, topSlot2 - 3);
+                  this.copyAlias(topSlot2 - 2, topSlot2 - 4);
                   if (this.peek(2).getSize() == 2) {
-                     this.copyAlias(var4 - 4, var4);
-                     this.copyAlias(var4 - 5, var4 - 1);
+                     this.copyAlias(topSlot2 - 4, topSlot2);
+                     this.copyAlias(topSlot2 - 5, topSlot2 - 1);
                   } else {
-                     this.copyAlias(var4 - 3, var4 - 5);
-                     this.copyAlias(var4 - 4, var4);
-                     this.copyAlias(var4 - 5, var4 - 1);
+                     this.copyAlias(topSlot2 - 3, topSlot2 - 5);
+                     this.copyAlias(topSlot2 - 4, topSlot2);
+                     this.copyAlias(topSlot2 - 5, topSlot2 - 1);
                   }
                   break label77;
                }
             case 91:
-               this.copyAlias(var4, var4 - 1);
-               this.copyAlias(var4 - 1, var4 - 2);
+               this.copyAlias(topSlot2, topSlot2 - 1);
+               this.copyAlias(topSlot2 - 1, topSlot2 - 2);
                if (this.peek(1).getSize() == 2) {
-                  this.copyAlias(var4 - 2, var4);
+                  this.copyAlias(topSlot2 - 2, topSlot2);
                } else {
-                  this.copyAlias(var4 - 2, var4 - 3);
-                  this.copyAlias(var4 - 3, var4);
+                  this.copyAlias(topSlot2 - 2, topSlot2 - 3);
+                  this.copyAlias(topSlot2 - 3, topSlot2);
                }
                break label77;
             case 95:
-               AliasSet var7 = this.aliases[var4 - 1];
-               AliasSet var9 = this.aliases[var4];
-               if (var7 != null) {
-                  var7.remove(var4 - 1);
-                  var7.add(var4);
+               AliasSet aliasSet = this.aliases[topSlot2 - 1];
+               AliasSet aliasSet2 = this.aliases[topSlot2];
+               if (aliasSet != null) {
+                  aliasSet.remove(topSlot2 - 1);
+                  aliasSet.add(topSlot2);
                }
 
-               if (var9 != null) {
-                  var9.remove(var4);
-                  var9.add(var4 - 1);
+               if (aliasSet2 != null) {
+                  aliasSet2.remove(topSlot2);
+                  aliasSet2.add(topSlot2 - 1);
                }
 
-               this.aliases[var4 - 1] = var9;
-               this.aliases[var4] = var7;
+               this.aliases[topSlot2 - 1] = aliasSet2;
+               this.aliases[topSlot2] = aliasSet;
                break label77;
             case 132:
                this.clearAlias(((IincInsnNode)instruction).var);
@@ -353,31 +353,31 @@ public class AliasFrame<V extends Value> extends Frame<V> {
             case 183:
             case 184:
             case 185:
-               if (Type.getReturnType(((MethodInsnNode)instruction).desc).getSort() == 0 || var4 > var3) {
+               if (Type.getReturnType(((MethodInsnNode)instruction).desc).getSort() == 0 || topSlot2 > topSlot) {
                   break label77;
                }
                break;
             case 186:
-               if (Type.getReturnType(((InvokeDynamicInsnNode)instruction).desc).getSort() == 0 || var4 > var3) {
+               if (Type.getReturnType(((InvokeDynamicInsnNode)instruction).desc).getSort() == 0 || topSlot2 > topSlot) {
                   break label77;
                }
          }
 
-         this.clearAlias(var4);
+         this.clearAlias(topSlot2);
       }
 
-      for (int var8 = var4 + 1; var8 <= var3; var8++) {
-         this.clearAlias(var8);
+      for (int nextIndex = topSlot2 + 1; nextIndex <= topSlot; nextIndex++) {
+         this.clearAlias(nextIndex);
       }
    }
 
    @Override
    public void clearStack() {
-      int var1 = this.getLocals();
-      int var2 = this.getStackSize();
+      int localCount = this.getLocals();
+      int stackSize = this.getStackSize();
 
-      for (int var12 = var1; var12 < var2 + var1; var12++) {
-         this.clearAlias(var12);
+      for (int localCount2 = localCount; localCount2 < stackSize + localCount; localCount2++) {
+         this.clearAlias(localCount2);
       }
 
       super.clearStack();
@@ -437,16 +437,16 @@ public class AliasFrame<V extends Value> extends Frame<V> {
       for (int index = 0; index < this.aliases.length; index++) {
          AliasSet group = this.aliases[index];
          if (group != null) {
-            AliasSet[] var10000 = this.aliases;
-            AliasSet var10002;
+            AliasSet[] aliases2 = this.aliases;
+            AliasSet aliasSet;
             if (group.size() == 1) {
-               var10002 = null;
+               aliasSet = null;
             } else {
-               Function<AliasSet, AliasSet> function5 = value -> value.copy();
-               var10002 = copies.computeIfAbsent(group, function5);
+               Function<AliasSet, AliasSet> mapper = value -> value.copy();
+               aliasSet = copies.computeIfAbsent(group, mapper);
             }
 
-            var10000[index] = var10002;
+            aliases2[index] = aliasSet;
          }
       }
 

@@ -14,18 +14,18 @@ public class ReturnTransformer extends OpcodeTransformer {
 
    @Override
    public String transform(CompilationContext context, AbstractInsnNode instruction, OperandStack stack, JumpEmitter jumps, String ownerName) {
-      StringBuilder var7 = new StringBuilder();
+      StringBuilder source = new StringBuilder();
       if (instruction.getOpcode() == 177) {
-         var7.append("return;\n");
-         return var7.toString();
+         source.append("return;\n");
+         return source.toString();
       } else {
-         int var9 = stack.sizeBefore();
-         var7.append("return ");
-         Type var25 = stack.typeBefore(var9 - 1);
-         String value26 = JniTypes.stackVariable("stack", var9 - 1, var25);
-         var7.append(value26);
-         var7.append(";\n");
-         return var7.toString();
+         int stackSizeBefore = stack.sizeBefore();
+         source.append("return ");
+         Type operandType = stack.typeBefore(stackSizeBefore - 1);
+         String stackValue = JniTypes.stackVariable("stack", stackSizeBefore - 1, operandType);
+         source.append(stackValue);
+         source.append(";\n");
+         return source.toString();
       }
    }
 }

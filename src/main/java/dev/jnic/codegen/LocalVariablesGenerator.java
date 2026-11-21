@@ -17,115 +17,115 @@ public class LocalVariablesGenerator implements SourceGenerator {
 
    @Override
    public String generate(CompilationContext context) {
-      StringBuilder var2 = new StringBuilder();
-      int var4 = 0;
+      StringBuilder source = new StringBuilder();
+      int localIndex = 0;
 
       while (true) {
-         int var5 = this.method.maxLocals;
-         if (var4 >= var5) {
-            String value12 = "\n";
-            var2.append(value12);
-            int var13 = this.method.maxStack;
-            int var7 = 0;
-            int var23 = 0;
+         int maxLocals = this.method.maxLocals;
+         if (localIndex >= maxLocals) {
+            String newline = "\n";
+            source.append(newline);
+            int maxStack = this.method.maxStack;
+            int stackPosition = 0;
+            int stackIndex = 0;
 
-            while (var7 < var13) {
-               var2.append("    jvalue stack");
-               var2.append(var23);
-               var2.append("; memset(&stack");
-               var2.append(var23);
-               var2.append(", 0, sizeof(jvalue));\n");
-               var7 = ++var23;
-               var13 = this.method.maxStack;
+            while (stackPosition < maxStack) {
+               source.append("    jvalue stack");
+               source.append(stackIndex);
+               source.append("; memset(&stack");
+               source.append(stackIndex);
+               source.append(", 0, sizeof(jvalue));\n");
+               stackPosition = ++stackIndex;
+               maxStack = this.method.maxStack;
             }
 
-            String value27 = "\n";
-            var2.append(value27);
-            var2.append("    jvalue temp");
-            var2.append(0);
-            var2.append("; memset(&temp");
-            var2.append(0);
-            var2.append(", 0, sizeof(jvalue));\n    jvalue temp");
-            var2.append(1);
-            var2.append("; memset(&temp");
-            var2.append(1);
-            var2.append(", 0, sizeof(jvalue));\n    jvalue temp");
-            var2.append(2);
-            var2.append("; memset(&temp");
-            var2.append(2);
-            var2.append(", 0, sizeof(jvalue));\n    jvalue temp");
-            var2.append(3);
-            var2.append("; memset(&temp");
-            var2.append(3);
-            var2.append(", 0, sizeof(jvalue));\n");
-            String value3 = "\n";
-            var2.append(value3);
+            String newline2 = "\n";
+            source.append(newline2);
+            source.append("    jvalue temp");
+            source.append(0);
+            source.append("; memset(&temp");
+            source.append(0);
+            source.append(", 0, sizeof(jvalue));\n    jvalue temp");
+            source.append(1);
+            source.append("; memset(&temp");
+            source.append(1);
+            source.append(", 0, sizeof(jvalue));\n    jvalue temp");
+            source.append(2);
+            source.append("; memset(&temp");
+            source.append(2);
+            source.append(", 0, sizeof(jvalue));\n    jvalue temp");
+            source.append(3);
+            source.append("; memset(&temp");
+            source.append(3);
+            source.append(", 0, sizeof(jvalue));\n");
+            String newline3 = "\n";
+            source.append(newline3);
             if ((this.method.access & 8) == 0) {
-               var2.append("    local0.l = thisObj;\n");
-               Type[] var28 = Type.getArgumentTypes(this.method.desc);
-               int var10 = var28.length;
-               int var8 = 0;
-               int var15 = 0;
-               int var6 = 1;
+               source.append("    local0.l = thisObj;\n");
+               Type[] argumentTypes = Type.getArgumentTypes(this.method.desc);
+               int argumentTypeCount = argumentTypes.length;
+               int argumentPosition = 0;
+               int index = 0;
+               int localOffset = 1;
 
-               while (var8 < var10) {
-                  var2.append("    local");
-                  var2.append(var6);
-                  String value16 = ".";
-                  var2.append(value16);
-                  String value29 = JniTypes.stackSlot(var28[var15]);
-                  var2.append(value29);
-                  var2.append(" = arg");
-                  var2.append(var15);
-                  var2.append(";\n");
-                  Type var17 = var28[var15];
-                  int var25 = new BasicValue(var17).getSize();
-                  int var10000 = var28.length;
-                  int var10001 = var15 + 1;
-                  int var10002 = var15 + 1;
-                  var6 += var25;
-                  var15 = var10002;
-                  var8 = var10001;
-                  var10 = var10000;
+               while (argumentPosition < argumentTypeCount) {
+                  source.append("    local");
+                  source.append(localOffset);
+                  String memberSeparator = ".";
+                  source.append(memberSeparator);
+                  String slotName = JniTypes.stackSlot(argumentTypes[index]);
+                  source.append(slotName);
+                  source.append(" = arg");
+                  source.append(index);
+                  source.append(";\n");
+                  Type type = argumentTypes[index];
+                  int slotWidth = new BasicValue(type).getSize();
+                  int argumentTypeCount2 = argumentTypes.length;
+                  int nextIndex = index + 1;
+                  int nextIndex2 = index + 1;
+                  localOffset += slotWidth;
+                  index = nextIndex2;
+                  argumentPosition = nextIndex;
+                  argumentTypeCount = argumentTypeCount2;
                }
             } else {
-               Type[] var18 = Type.getArgumentTypes(this.method.desc);
-               int var9 = var18.length;
-               int var11 = 0;
-               int var19 = 0;
-               int var24 = 0;
+               Type[] argumentTypes2 = Type.getArgumentTypes(this.method.desc);
+               int argumentTypes2Count = argumentTypes2.length;
+               int argumentPosition2 = 0;
+               int index2 = 0;
+               int localOffset2 = 0;
 
-               while (var11 < var9) {
-                  var2.append("    local");
-                  var2.append(var24);
-                  String value20 = ".";
-                  var2.append(value20);
-                  String value21 = JniTypes.stackSlot(var18[var19]);
-                  var2.append(value21);
-                  var2.append(" = arg");
-                  var2.append(var19);
-                  var2.append(";\n");
-                  Type var22 = var18[var19];
-                  int var26 = new BasicValue(var22).getSize();
-                  int var30 = var18.length;
-                  int var31 = var19 + 1;
-                  int var32 = var19 + 1;
-                  var24 += var26;
-                  var19 = var32;
-                  var11 = var31;
-                  var9 = var30;
+               while (argumentPosition2 < argumentTypes2Count) {
+                  source.append("    local");
+                  source.append(localOffset2);
+                  String memberSeparator2 = ".";
+                  source.append(memberSeparator2);
+                  String slotName2 = JniTypes.stackSlot(argumentTypes2[index2]);
+                  source.append(slotName2);
+                  source.append(" = arg");
+                  source.append(index2);
+                  source.append(";\n");
+                  Type type2 = argumentTypes2[index2];
+                  int slotWidth2 = new BasicValue(type2).getSize();
+                  int argumentTypes2Count2 = argumentTypes2.length;
+                  int nextIndex3 = index2 + 1;
+                  int nextIndex4 = index2 + 1;
+                  localOffset2 += slotWidth2;
+                  index2 = nextIndex4;
+                  argumentPosition2 = nextIndex3;
+                  argumentTypes2Count = argumentTypes2Count2;
                }
             }
 
-            return var2.toString();
+            return source.toString();
          }
 
-         var2.append("    jvalue local");
-         var2.append(var4);
-         var2.append("; memset(&local");
-         var2.append(var4);
-         var2.append(", 0, sizeof(jvalue));\n");
-         var4++;
+         source.append("    jvalue local");
+         source.append(localIndex);
+         source.append("; memset(&local");
+         source.append(localIndex);
+         source.append(", 0, sizeof(jvalue));\n");
+         localIndex++;
       }
    }
 }

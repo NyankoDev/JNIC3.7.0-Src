@@ -14,9 +14,9 @@ public class AliasSet {
    }
 
    public static AliasSet singleton(int index) {
-      AliasSet var1 = new AliasSet();
-      var1.slots.set(index);
-      return var1;
+      AliasSet aliasSet = new AliasSet();
+      aliasSet.slots.set(index);
+      return aliasSet;
    }
 
    void add(int index) {
@@ -44,7 +44,7 @@ public class AliasSet {
    }
 
    AliasSet copy() {
-      BitSet var2 = (BitSet)this.slots.clone();
-      return new AliasSet(var2);
+      BitSet bitSet = (BitSet)this.slots.clone();
+      return new AliasSet(bitSet);
    }
 }

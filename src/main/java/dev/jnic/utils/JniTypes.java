@@ -11,18 +11,18 @@ public final class JniTypes {
    }
 
    public static String nativeType(Type type) {
-      int var1 = type.getSort();
-      if (var1 == 10) {
+      int typeSort = type.getSort();
+      if (typeSort == 10) {
          return "jobject";
       }
 
-      if (var1 != 9) {
-         int var2 = type.getSort();
-         if (Integer.compareUnsigned(var2, 8) > 0) {
+      if (typeSort != 9) {
+         int typeSort2 = type.getSort();
+         if (Integer.compareUnsigned(typeSort2, 8) > 0) {
             throw new IllegalArgumentException("Type sort is invalid");
          }
 
-         switch (var2) {
+         switch (typeSort2) {
             case 0:
                return "void";
             case 1:
@@ -45,10 +45,10 @@ public final class JniTypes {
                throw new AssertionError();
          }
       } else {
-         int var3 = type.getElementType().getSort();
-         if (9 != var3) {
-            int var4 = type.getElementType().getSort();
-            if (10 != var4) {
+         int typeSort3 = type.getElementType().getSort();
+         if (9 != typeSort3) {
+            int typeSort4 = type.getElementType().getSort();
+            if (10 != typeSort4) {
                return nativeType(type.getElementType()) + "Array";
             }
          }
@@ -75,8 +75,8 @@ public final class JniTypes {
 
    public static String javaTypeName(Type type) {
       if (type.getSort() != 10) {
-         String value5 = jniTypeSuffix(type);
-         return value5 == null ? value5.toLowerCase() : value5.toLowerCase();
+         String typeSuffix = jniTypeSuffix(type);
+         return typeSuffix == null ? typeSuffix.toLowerCase() : typeSuffix.toLowerCase();
       } else {
          return type.getInternalName().replaceAll(new String("/"), new String("."));
       }
@@ -84,14 +84,14 @@ public final class JniTypes {
 
    static String valueSlot(Type type) {
       if (type.getSort() != 11) {
-         int var1 = type.getSort();
-         if (var1 != 0) {
-            int var2 = type.getSort();
-            if (Integer.compareUnsigned(var2 - 1, 9) > 0) {
+         int typeSort = type.getSort();
+         if (typeSort != 0) {
+            int typeSort2 = type.getSort();
+            if (Integer.compareUnsigned(typeSort2 - 1, 9) > 0) {
                throw new AssertionError();
             }
 
-            switch (var2 - 1) {
+            switch (typeSort2 - 1) {
                case 0:
                   return new String("z");
                case 1:
@@ -122,9 +122,9 @@ public final class JniTypes {
 
    public static String jniTypeSuffix(Type type) {
       if (type.getSort() != 11) {
-         int var1 = type.getSort();
-         if (Integer.compareUnsigned(var1, 10) <= 0) {
-            switch (var1) {
+         int typeSort = type.getSort();
+         if (Integer.compareUnsigned(typeSort, 10) <= 0) {
+            switch (typeSort) {
                case 0:
                   return "Void";
                case 1:
@@ -157,12 +157,12 @@ public final class JniTypes {
    }
 
    public static Type newArrayType(IntInsnNode intInsnNode) {
-      int var1 = intInsnNode.operand;
-      if (Integer.compareUnsigned(var1 + -4, 7) > 0) {
+      int elementTypeCode = intInsnNode.operand;
+      if (Integer.compareUnsigned(elementTypeCode + -4, 7) > 0) {
          throw new IllegalArgumentException("Not a suitable argument to NEWARRAY");
       }
 
-      switch (var1 + -4) {
+      switch (elementTypeCode + -4) {
          case 0:
             return Type.BOOLEAN_TYPE;
          case 1:
@@ -186,8 +186,8 @@ public final class JniTypes {
 
    public static String stackVariable(String text, int index, Type type) {
       if (index >= 0) {
-         String value3 = stackSlot(type);
-         return value3 == null ? text + index + "." + value3 : text + index + "." + value3;
+         String slotName = stackSlot(type);
+         return slotName == null ? text + index + "." + slotName : text + index + "." + slotName;
       } else {
          throw new AssertionError();
       }
@@ -195,8 +195,8 @@ public final class JniTypes {
 
    public static String valueVariable(String text, int index, Type type) {
       if (index >= 0) {
-         String value3 = valueSlot(type);
-         return text + index + "." + value3;
+         String slotName = valueSlot(type);
+         return text + index + "." + slotName;
       } else {
          throw new AssertionError();
       }

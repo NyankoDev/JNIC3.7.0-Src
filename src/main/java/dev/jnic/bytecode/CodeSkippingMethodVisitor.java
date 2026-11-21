@@ -105,6 +105,6 @@ public class CodeSkippingMethodVisitor extends MethodVisitor {
    }
 
    static {
-      int[] var0 = new int[]{0, 0, 0, 0, 0};
+      int[] words = new int[]{0, 0, 0, 0, 0};
    }
 }

@@ -27,14 +27,14 @@ public enum TargetPlatform {
    }
 
    public static TargetPlatform current() {
-      String value0 = System.getProperty("os.name").toLowerCase();
-      String value1 = System.getProperty("os.arch").toLowerCase();
-      TargetPlatform[] var2 = values();
+      String operatingSystem = System.getProperty("os.name").toLowerCase();
+      String architecture = System.getProperty("os.arch").toLowerCase();
+      TargetPlatform[] targetPlatforms = values();
 
-      for (int var3 = 0; var3 < var2.length; var3++) {
-         TargetPlatform var4 = var2[var3];
-         if (value0.contains(var4.getOsName()) && var4.getArchitectures().contains(value1)) {
-            return var4;
+      for (int index = 0; index < targetPlatforms.length; index++) {
+         TargetPlatform targetPlatform = targetPlatforms[index];
+         if (operatingSystem.contains(targetPlatform.getOsName()) && targetPlatform.getArchitectures().contains(architecture)) {
+            return targetPlatform;
          }
       }
 
@@ -50,6 +50,6 @@ public enum TargetPlatform {
    }
 
    static {
-      TargetPlatform[] var36 = new TargetPlatform[]{WINDOWS_X86_64, WINDOWS_AARCH64, MACOS_X86_64, MACOS_AARCH64, LINUX_X86_64, LINUX_AARCH64};
+      TargetPlatform[] targetPlatforms = new TargetPlatform[]{WINDOWS_X86_64, WINDOWS_AARCH64, MACOS_X86_64, MACOS_AARCH64, LINUX_X86_64, LINUX_AARCH64};
    }
 }

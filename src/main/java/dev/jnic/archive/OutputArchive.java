@@ -21,58 +21,58 @@ public class OutputArchive {
       zipOutputStream.closeEntry();
    }
 
-   public void write(Collection<?> items1, Map<?, ?> map) throws IOException {
+   public void write(Collection<?> classes, Map<?, ?> resources) throws IOException {
       this.prepareOutputFile();
 
-      try (ZipOutputStream var3 = new ZipOutputStream(new FileOutputStream(this.outputFile))) {
+      try (ZipOutputStream zipOutputStream = new ZipOutputStream(new FileOutputStream(this.outputFile))) {
          JnicLogger.INSTANCE.info("Writing to file " + this.outputFile);
 
-         for (Object var5 : items1) {
-            if (var5 != null && !(var5 instanceof ClassNode)) {
+         for (Object classValue : classes) {
+            if (classValue != null && !(classValue instanceof ClassNode)) {
                throw new ClassCastException("");
             }
 
-            ClassNode var6 = (ClassNode)var5;
-            ClassWriter var9 = new ClassWriter(1);
-            var6.accept(var9);
-            this.writeEntry(var6.name + ".class", var9.toByteArray(), var3);
+            ClassNode classNode = (ClassNode)classValue;
+            ClassWriter writer = new ClassWriter(1);
+            classNode.accept(writer);
+            this.writeEntry(classNode.name + ".class", writer.toByteArray(), zipOutputStream);
          }
 
-         for (Object var10 : map.entrySet()) {
-            if (var10 != null && !(var10 instanceof Entry)) {
+         for (Object resourceEntryValue : resources.entrySet()) {
+            if (resourceEntryValue != null && !(resourceEntryValue instanceof Entry)) {
                throw new ClassCastException("");
             }
 
-            Entry var13 = (Entry)var10;
-            Object var11 = var13.getKey();
-            Object var14 = var13.getValue();
-            if (var11 != null && !(var11 instanceof String) || var14 != null && !(var14 instanceof byte[])) {
+            Entry resourceEntry = (Entry)resourceEntryValue;
+            Object key = resourceEntry.getKey();
+            Object entryValue = resourceEntry.getValue();
+            if (key != null && !(key instanceof String) || entryValue != null && !(entryValue instanceof byte[])) {
                throw new ClassCastException("");
             }
 
-            this.writeEntry((String)var11, (byte[])var14, var3);
+            this.writeEntry((String)key, (byte[])entryValue, zipOutputStream);
          }
       }
    }
 
    private void prepareOutputFile() throws IOException {
-      File var1 = new File(this.outputFile);
-      if (var1.exists()) {
+      File file = new File(this.outputFile);
+      if (file.exists()) {
          JnicLogger.INSTANCE.warn(this.outputFile + " already exists, renaming to " + this.outputFile + ".BACKUP");
-         File var2 = new File(this.outputFile + ".BACKUP");
-         if (var2.exists()) {
+         File file2 = new File(this.outputFile + ".BACKUP");
+         if (file2.exists()) {
             JnicLogger.INSTANCE.warn(this.outputFile + ".BACKUP already exists, nuking the backup...");
-            if (!var2.delete()) {
+            if (!file2.delete()) {
                throw new IOException("Failed to delete backup file");
             }
          }
 
-         if (!var1.renameTo(var2)) {
+         if (!file.renameTo(file2)) {
             throw new IOException("Failed to rename file");
          }
       }
 
-      if (!var1.createNewFile()) {
+      if (!file.createNewFile()) {
          throw new IOException("Failed to create new file");
       }
    }

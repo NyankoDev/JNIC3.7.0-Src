@@ -20,8 +20,8 @@ public class LdcTransformer extends OpcodeTransformer {
          throw new AssertionError();
       }
 
-      Object var6 = ((LdcInsnNode)instruction).cst;
-      return "stack" + stack.sizeBefore() + "." + constantSlot(var6) + " = " + context.constant(ownerName, var6) + ";\n";
+      Object constant = ((LdcInsnNode)instruction).cst;
+      return "stack" + stack.sizeBefore() + "." + constantSlot(constant) + " = " + context.constant(ownerName, constant) + ";\n";
    }
 
    private static char constantSlot(Object value) {

@@ -21,26 +21,26 @@ public class CompilationPlan {
 
    public CompilationPlan(InputArchive inputArchive, JnicConfig config) {
       this.config = config;
-      boolean var17 = Jnic.getLicense().licenseType().equals(EVALUATION_EDITION);
+      boolean evaluationMode = Jnic.getLicense().licenseType().equals(EVALUATION_EDITION);
 
-      for (ClassReader var10000 : inputArchive.getClasses()) {
-         ClassNode var20 = new ClassNode();
-         var10000.accept(var20, 2);
-         ArrayList var21 = new ArrayList();
+      for (ClassReader reader : inputArchive.getClasses()) {
+         ClassNode classNode = new ClassNode();
+         reader.accept(classNode, 2);
+         ArrayList selectedMethods = new ArrayList();
 
-         for (MethodNode var23 : var20.methods) {
-            if (config.isIncluded(var20, var23)) {
-               var21.add(var23);
-               this.translatedMethods.registerMethod(var20.name, var23.name, var23.desc);
-               if (var17) {
+         for (MethodNode methodNode : classNode.methods) {
+            if (config.isIncluded(classNode, methodNode)) {
+               selectedMethods.add(methodNode);
+               this.translatedMethods.registerMethod(classNode.name, methodNode.name, methodNode.desc);
+               if (evaluationMode) {
                   break;
                }
             }
          }
 
-         if (!var21.isEmpty()) {
-            this.methods.put(var20, var21);
-            if (var17) {
+         if (!selectedMethods.isEmpty()) {
+            this.methods.put(classNode, selectedMethods);
+            if (evaluationMode) {
                break;
             }
          }

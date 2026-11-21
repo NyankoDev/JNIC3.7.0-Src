@@ -19,54 +19,54 @@ class RuntimeClassWriter extends ClassWriter {
       this.classes = classes;
    }
 
-   private String superName(String text) {
-      Objects.requireNonNull(text, "");
-      if (text.equals(this.loaderClassName)) {
+   private String superName(String className) {
+      Objects.requireNonNull(className, "");
+      if (className.equals(this.loaderClassName)) {
          return "java/io/InputStream";
-      } else if (text.equals("java/io/InputStream")) {
+      } else if (className.equals("java/io/InputStream")) {
          return "java/lang/Object";
-      } else if (this.classes.get(text) == null) {
+      } else if (this.classes.get(className) == null) {
          return null;
       } else {
-         Object var2 = this.classes.get(text);
-         if (var2 != null && !(var2 instanceof ClassReader)) {
+         Object classReader = this.classes.get(className);
+         if (classReader != null && !(classReader instanceof ClassReader)) {
             throw new ClassCastException("");
          } else {
-            return ((ClassReader)var2).getSuperName();
+            return ((ClassReader)classReader).getSuperName();
          }
       }
    }
 
-   private Set ancestors(String value1) {
-      HashSet var6 = new HashSet();
-      var6.add(value1);
+   private Set ancestors(String className) {
+      HashSet elements = new HashSet();
+      elements.add(className);
 
       while (true) {
-         value1 = this.superName(value1);
-         if (value1 == null) {
-            return var6;
+         className = this.superName(className);
+         if (className == null) {
+            return elements;
          }
 
-         var6.add(value1);
+         elements.add(className);
       }
    }
 
    @Override
-   protected String getCommonSuperClass(String text, String text2) {
-      String value7 = this.remapper.originalName(text);
-      String value8 = this.remapper.originalName(text2);
-      Set var9 = this.ancestors(value8);
-      if (var9.contains(value7)) {
-         return text;
+   protected String getCommonSuperClass(String firstType, String secondType) {
+      String leftName = this.remapper.originalName(firstType);
+      String rightName = this.remapper.originalName(secondType);
+      Set elements = this.ancestors(rightName);
+      if (elements.contains(leftName)) {
+         return firstType;
       }
 
       do {
-         value7 = this.superName(value7);
-         if (value7 == null) {
-            return super.getCommonSuperClass(text, text2);
+         leftName = this.superName(leftName);
+         if (leftName == null) {
+            return super.getCommonSuperClass(firstType, secondType);
          }
-      } while (!var9.contains(value7));
+      } while (!elements.contains(leftName));
 
-      return this.remapper.originalName(value7);
+      return this.remapper.originalName(leftName);
    }
 }

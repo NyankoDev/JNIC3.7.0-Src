@@ -40,42 +40,42 @@ public class NativeMethodGenerator implements SourceGenerator {
    }
 
    private Map<AbstractInsnNode, Integer> createDispatchTable() {
-      Set<AbstractInsnNode> items2 = new HashSet();
-      items2.add(this.method.instructions.getFirst());
+      Set<AbstractInsnNode> blockStarts = new HashSet();
+      blockStarts.add(this.method.instructions.getFirst());
 
-      for (AbstractInsnNode var1 : this.method.instructions) {
-         if (var1 instanceof LabelNode) {
-            items2.add(var1);
+      for (AbstractInsnNode currentInstruction : this.method.instructions) {
+         if (currentInstruction instanceof LabelNode) {
+            blockStarts.add(currentInstruction);
          }
 
-         if (var1 instanceof JumpInsnNode && var1.getNext() != null) {
-            items2.add(var1.getNext());
+         if (currentInstruction instanceof JumpInsnNode && currentInstruction.getNext() != null) {
+            blockStarts.add(currentInstruction.getNext());
          }
       }
 
-      int var4 = items2.size() + ThreadLocalRandom.current().nextInt(items2.size());
-      List var6 = IntStream.rangeClosed(-var4, var4).boxed().collect(Collectors.toList());
-      Collections.shuffle(var6);
-      HashMap var8 = new HashMap();
+      int count = blockStarts.size() + ThreadLocalRandom.current().nextInt(blockStarts.size());
+      List dispatchKeys = IntStream.rangeClosed(-count, count).boxed().collect(Collectors.toList());
+      Collections.shuffle(dispatchKeys);
+      HashMap dispatchTable = new HashMap();
 
-      for (AbstractInsnNode var5 : items2) {
-         var8.put(var5, (Integer)var6.get(var8.size()));
+      for (AbstractInsnNode currentInstruction2 : blockStarts) {
+         dispatchTable.put(currentInstruction2, (Integer)dispatchKeys.get(dispatchTable.size()));
       }
 
-      return var8;
+      return dispatchTable;
    }
 
    private Map<LabelNode, String> createLabels() {
-      HashMap var2 = new HashMap();
+      HashMap labels = new HashMap();
 
-      for (AbstractInsnNode var4 : this.method.instructions) {
-         if (var4 instanceof LabelNode) {
-            LabelNode var5 = (LabelNode)var4;
-            var2.put(var5, "L" + var2.size());
+      for (AbstractInsnNode currentInstruction : this.method.instructions) {
+         if (currentInstruction instanceof LabelNode) {
+            LabelNode label = (LabelNode)currentInstruction;
+            labels.put(label, "L" + labels.size());
          }
       }
 
-      return var2;
+      return labels;
    }
 
    private String emitExceptionHandlers(CompilationContext context, List<TryCatchBlockNode> handlers, JumpEmitter jump) {
@@ -139,96 +139,96 @@ public class NativeMethodGenerator implements SourceGenerator {
    }
 
    private String returnOnException(CompilationContext context) {
-      Type var2 = Type.getReturnType(this.method.desc);
+      Type returnType = Type.getReturnType(this.method.desc);
       return (JnicLogger.TRACE_ENABLED ? "puts(\"[JNIC: exception unhandled]\");" : "")
-         + (var2.getSort() == 0 ? "        return;" : "        return " + JniTypes.stackVariable("temp", 0, var2) + ";");
+         + (returnType.getSort() == 0 ? "        return;" : "        return " + JniTypes.stackVariable("temp", 0, returnType) + ";");
    }
 
    @Override
    public String generate(CompilationContext context) {
-      Analyzer var2 = new Analyzer<>(new TypedBasicInterpreter());
-      NullnessAnalyzer var4 = new NullnessAnalyzer();
+      Analyzer typeAnalyzer = new Analyzer<>(new TypedBasicInterpreter());
+      NullnessAnalyzer nullnessAnalyzer = new NullnessAnalyzer();
 
       try {
-         var2.analyze(this.owner.name, this.method);
-         var4.analyze(this.owner.name, this.method);
-      } catch (AnalyzerException var33) {
-         String var22 = "Method failed verification: " + this.owner.name + "." + this.method.name + this.method.desc;
-         throw new CompilationException(var22, var33);
+         typeAnalyzer.analyze(this.owner.name, this.method);
+         nullnessAnalyzer.analyze(this.owner.name, this.method);
+      } catch (AnalyzerException analyzerFailure) {
+         String expression = "Method failed verification: " + this.owner.name + "." + this.method.name + this.method.desc;
+         throw new CompilationException(expression, analyzerFailure);
       }
 
-      Frame[] var24 = var2.getFrames();
-      Frame[] var25 = var4.getFrames();
-      StringBuilder var5 = new StringBuilder();
-      String var8 = this.functionName;
-      MethodNode var7 = this.method;
-      ClassNode var6 = this.owner;
-      var5.append(new MethodDeclarationGenerator(var6, var7, var8).generate(null)).append(" {\n");
-      MethodNode var27 = this.method;
-      String var26 = this.owner.name;
-      var5.append(new LocalVariablesGenerator(var26, var27).generate(null));
+      Frame[] typeFrames = typeAnalyzer.getFrames();
+      Frame[] nullnessFrames = nullnessAnalyzer.getFrames();
+      StringBuilder source = new StringBuilder();
+      String functionName2 = this.functionName;
+      MethodNode method2 = this.method;
+      ClassNode declaringClass = this.owner;
+      source.append(new MethodDeclarationGenerator(declaringClass, method2, functionName2).generate(null)).append(" {\n");
+      MethodNode method3 = this.method;
+      String memberName = this.owner.name;
+      source.append(new LocalVariablesGenerator(memberName, method3).generate(null));
       if (JnicLogger.TRACE_ENABLED) {
-         var5.append("puts(\"[JNIC: begin ").append(SourceText.diagnosticText(this.owner.name + "#" + this.method.name + this.method.desc)).append("]\");\n");
+         source.append("puts(\"[JNIC: begin ").append(SourceText.diagnosticText(this.owner.name + "#" + this.method.name + this.method.desc)).append("]\");\n");
       }
 
-      boolean var19 = context.getOptions().isFlowObfuscationEnabled();
-      Map<AbstractInsnNode, Integer> value28 = var19 ? this.createDispatchTable() : null;
-      Map<LabelNode, String> value29 = var19 ? null : this.createLabels();
-      if (var19) {
-         var5.append("    int flow = ")
-            .append(context.getLiterals().encryptedInteger((Integer)value28.get(this.method.instructions.getFirst())))
+      boolean useDispatcher = context.getOptions().isFlowObfuscationEnabled();
+      Map<AbstractInsnNode, Integer> dispatchTable = useDispatcher ? this.createDispatchTable() : null;
+      Map<LabelNode, String> labels = useDispatcher ? null : this.createLabels();
+      if (useDispatcher) {
+         source.append("    int flow = ")
+            .append(context.getLiterals().encryptedInteger((Integer)dispatchTable.get(this.method.instructions.getFirst())))
             .append(";\n    dispatch:; switch (flow) {");
       }
 
-      for (int var9 = 0; var9 < this.method.instructions.size(); var9++) {
-         AbstractInsnNode var10 = this.method.instructions.get(var9);
-         if (var19) {
-            if (value28.containsKey(var10)) {
-               var5.append("    case ").append(value28.get(var10)).append(":\n");
+      for (int index = 0; index < this.method.instructions.size(); index++) {
+         AbstractInsnNode currentInstruction = this.method.instructions.get(index);
+         if (useDispatcher) {
+            if (dispatchTable.containsKey(currentInstruction)) {
+               source.append("    case ").append(dispatchTable.get(currentInstruction)).append(":\n");
             }
-         } else if (var10 instanceof LabelNode) {
-            var5.append("    ").append((String)value29.get((LabelNode)var10)).append(":;\n");
+         } else if (currentInstruction instanceof LabelNode) {
+            source.append("    ").append((String)labels.get((LabelNode)currentInstruction)).append(":;\n");
          }
 
-         if (var10.getOpcode() != -1) {
-            int var11 = var19 ? value28.getOrDefault(var10.getNext(), 0) : 0;
-            JumpEmitter var20 = var19
-               ? (text, labelNode) -> dispatchJump(context, value28, var11, text, labelNode)
-               : (text, labelNode) -> labelJump(value29, text, labelNode);
-            Frame var12 = var24[var9];
-            Frame var13 = var9 + 1 < var24.length ? var24[var9 + 1] : null;
-            NullnessFrame var10003 = (NullnessFrame)var25[var9];
-            String var10005 = this.owner.name;
-            boolean var18 = context.getOptions().isIntrinsicsEnabled();
-            String var17 = var10005;
-            JumpEmitter var16 = var20;
-            NullnessFrame var15 = var10003;
-            Frame var14 = var13;
-            Frame var32 = var12;
-            AbstractInsnNode var30 = var10;
-            InstructionGenerator var31 = new InstructionGenerator(var30, var32, var14, var15, var16, var17, var18);
-            var5.append("    ").append(var31.generate(context));
-            if (var31.canThrow()) {
-               boolean var21 = var10.getOpcode() == 191;
-               if (!var21) {
-                  var5.append(var19 ? "    if (" : "    if (__builtin_expect(");
-                  var5.append(context.jniCall("ExceptionCheck"));
-                  var5.append(var19 ? ") {\n" : ", 0)) {\n");
+         if (currentInstruction.getOpcode() != -1) {
+            int nextDispatchKey = useDispatcher ? dispatchTable.getOrDefault(currentInstruction.getNext(), 0) : 0;
+            JumpEmitter jumpEmitter = useDispatcher
+               ? (text, labelNode) -> dispatchJump(context, dispatchTable, nextDispatchKey, text, labelNode)
+               : (text, labelNode) -> labelJump(labels, text, labelNode);
+            Frame frame = typeFrames[index];
+            Frame frame2 = index + 1 < typeFrames.length ? typeFrames[index + 1] : null;
+            NullnessFrame nullnessFrame = (NullnessFrame)nullnessFrames[index];
+            String memberName2 = this.owner.name;
+            boolean isIntrinsicsEnabled = context.getOptions().isIntrinsicsEnabled();
+            String memberName3 = memberName2;
+            JumpEmitter jumpEmitter2 = jumpEmitter;
+            NullnessFrame nullnessFrame2 = nullnessFrame;
+            Frame frame3 = frame2;
+            Frame frame4 = frame;
+            AbstractInsnNode currentInstruction2 = currentInstruction;
+            InstructionGenerator instructionGenerator = new InstructionGenerator(currentInstruction2, frame4, frame3, nullnessFrame2, jumpEmitter2, memberName3, isIntrinsicsEnabled);
+            source.append("    ").append(instructionGenerator.generate(context));
+            if (instructionGenerator.canThrow()) {
+               boolean opcodeIndex = currentInstruction.getOpcode() == 191;
+               if (!opcodeIndex) {
+                  source.append(useDispatcher ? "    if (" : "    if (__builtin_expect(");
+                  source.append(context.jniCall("ExceptionCheck"));
+                  source.append(useDispatcher ? ") {\n" : ", 0)) {\n");
                }
 
-               var5.append(this.emitExceptionHandlers(context, var2.getHandlers(var9), var20));
-               if (!var21) {
-                  var5.append("    }\n");
+               source.append(this.emitExceptionHandlers(context, typeAnalyzer.getHandlers(index), jumpEmitter));
+               if (!opcodeIndex) {
+                  source.append("    }\n");
                }
             }
          }
       }
 
-      if (var19) {
-         var5.append("    } __builtin_unreachable();");
+      if (useDispatcher) {
+         source.append("    } __builtin_unreachable();");
       }
 
-      return var5.append('}').toString();
+      return source.append('}').toString();
    }
 
    private static String labelJump(Map<LabelNode, String> map, String text, LabelNode labelNode) {
@@ -236,9 +236,9 @@ public class NativeMethodGenerator implements SourceGenerator {
    }
 
    private static String dispatchJump(CompilationContext context, Map<AbstractInsnNode, Integer> map, int index, String text, LabelNode labelNode) {
-      String value5 = context.getLiterals().encryptedInteger((Integer)map.get(labelNode));
+      String encryptedValue = context.getLiterals().encryptedInteger((Integer)map.get(labelNode));
       return "1".equals(text)
-         ? "flow = " + value5 + "; goto dispatch;"
-         : "flow = (" + text + ") ? " + value5 + " : " + context.getLiterals().encryptedInteger(index) + "; goto dispatch;";
+         ? "flow = " + encryptedValue + "; goto dispatch;"
+         : "flow = (" + text + ") ? " + encryptedValue + " : " + context.getLiterals().encryptedInteger(index) + "; goto dispatch;";
    }
 }

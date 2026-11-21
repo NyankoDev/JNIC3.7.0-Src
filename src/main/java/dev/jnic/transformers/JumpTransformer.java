@@ -17,188 +17,188 @@ public class JumpTransformer extends OpcodeTransformer {
 
    @Override
    public String transform(CompilationContext context, AbstractInsnNode instruction, OperandStack stack, JumpEmitter jumps, String ownerName) {
-      int var7 = stack.sizeBefore();
-      int var8 = stack.sizeBefore();
-      StringBuilder var6 = new StringBuilder();
-      int var9 = instruction.getOpcode();
-      if (Integer.compareUnsigned(var9 + -153, 46) <= 0) {
-         JumpInsnNode var14;
-         String value17;
+      int stackSize = stack.sizeBefore();
+      int operandCount = stack.sizeBefore();
+      StringBuilder source = new StringBuilder();
+      int opcode = instruction.getOpcode();
+      if (Integer.compareUnsigned(opcode + -153, 46) <= 0) {
+         JumpInsnNode jumpInstruction;
+         String generatedSource;
          label50: {
-            JumpInsnNode var15;
-            String value80;
+            JumpInsnNode jumpInstruction2;
+            String generatedSource2;
             label49: {
-               JumpInsnNode var16;
-               String value78;
-               switch (var9 + -153) {
+               JumpInsnNode jumpInstruction3;
+               String generatedSource3;
+               switch (opcode + -153) {
                   case 0:
-                     Type var11 = Type.INT_TYPE;
-                     String value12 = JniTypes.stackVariable("stack", var7 - 1, var11);
-                     var6.append(value12);
-                     var6.append(" == ");
-                     String value38 = "0";
-                     var6.append(value38);
-                     value17 = var6.toString();
-                     var14 = (JumpInsnNode)instruction;
+                     Type intType = Type.INT_TYPE;
+                     String stackValue = JniTypes.stackVariable("stack", stackSize - 1, intType);
+                     source.append(stackValue);
+                     source.append(" == ");
+                     String zeroLiteral = "0";
+                     source.append(zeroLiteral);
+                     generatedSource = source.toString();
+                     jumpInstruction = (JumpInsnNode)instruction;
                      break label50;
                   case 1:
-                     Type var21 = Type.INT_TYPE;
-                     String value39 = JniTypes.stackVariable("stack", var7 - 1, var21);
-                     var6.append(value39);
-                     var6.append(" != ");
-                     String value40 = "0";
-                     var6.append(value40);
-                     value17 = var6.toString();
-                     var14 = (JumpInsnNode)instruction;
+                     Type intType2 = Type.INT_TYPE;
+                     String stackValue2 = JniTypes.stackVariable("stack", stackSize - 1, intType2);
+                     source.append(stackValue2);
+                     source.append(" != ");
+                     String zeroLiteral2 = "0";
+                     source.append(zeroLiteral2);
+                     generatedSource = source.toString();
+                     jumpInstruction = (JumpInsnNode)instruction;
                      break label50;
                   case 2:
-                     Type var22 = Type.INT_TYPE;
-                     String value41 = JniTypes.stackVariable("stack", var7 - 1, var22);
-                     var6.append(value41);
-                     var6.append(" < ");
-                     String value42 = "0";
-                     var6.append(value42);
-                     value17 = var6.toString();
-                     var14 = (JumpInsnNode)instruction;
+                     Type intType3 = Type.INT_TYPE;
+                     String stackValue3 = JniTypes.stackVariable("stack", stackSize - 1, intType3);
+                     source.append(stackValue3);
+                     source.append(" < ");
+                     String zeroLiteral3 = "0";
+                     source.append(zeroLiteral3);
+                     generatedSource = source.toString();
+                     jumpInstruction = (JumpInsnNode)instruction;
                      break label50;
                   case 3:
-                     Type var23 = Type.INT_TYPE;
-                     String value43 = JniTypes.stackVariable("stack", var7 - 1, var23);
-                     var6.append(value43);
-                     var6.append(" >= ");
-                     String value44 = "0";
-                     var6.append(value44);
-                     value17 = var6.toString();
-                     var14 = (JumpInsnNode)instruction;
+                     Type intType4 = Type.INT_TYPE;
+                     String stackValue4 = JniTypes.stackVariable("stack", stackSize - 1, intType4);
+                     source.append(stackValue4);
+                     source.append(" >= ");
+                     String zeroLiteral4 = "0";
+                     source.append(zeroLiteral4);
+                     generatedSource = source.toString();
+                     jumpInstruction = (JumpInsnNode)instruction;
                      break label50;
                   case 4:
-                     Type var24 = Type.INT_TYPE;
-                     String value45 = JniTypes.stackVariable("stack", var7 - 1, var24);
-                     var6.append(value45);
-                     var6.append(" > ");
-                     String value46 = "0";
-                     var6.append(value46);
-                     value17 = var6.toString();
-                     var14 = (JumpInsnNode)instruction;
+                     Type intType5 = Type.INT_TYPE;
+                     String stackValue5 = JniTypes.stackVariable("stack", stackSize - 1, intType5);
+                     source.append(stackValue5);
+                     source.append(" > ");
+                     String zeroLiteral5 = "0";
+                     source.append(zeroLiteral5);
+                     generatedSource = source.toString();
+                     jumpInstruction = (JumpInsnNode)instruction;
                      break label50;
                   case 5:
-                     Type var25 = Type.INT_TYPE;
-                     String value47 = JniTypes.stackVariable("stack", var7 - 1, var25);
-                     var6.append(value47);
-                     var6.append(" <= ");
-                     String value48 = "0";
-                     var6.append(value48);
-                     value17 = var6.toString();
-                     var14 = (JumpInsnNode)instruction;
+                     Type intType6 = Type.INT_TYPE;
+                     String stackValue6 = JniTypes.stackVariable("stack", stackSize - 1, intType6);
+                     source.append(stackValue6);
+                     source.append(" <= ");
+                     String zeroLiteral6 = "0";
+                     source.append(zeroLiteral6);
+                     generatedSource = source.toString();
+                     jumpInstruction = (JumpInsnNode)instruction;
                      break label50;
                   case 6:
-                     Type var26 = Type.INT_TYPE;
-                     String value49 = JniTypes.stackVariable("stack", var8 + -2, var26);
-                     var6.append(value49);
-                     var6.append(" == ");
-                     Type var50 = Type.INT_TYPE;
-                     String value51 = JniTypes.stackVariable("stack", var7 - 1, var50);
-                     var6.append(value51);
-                     value80 = var6.toString();
-                     var15 = (JumpInsnNode)instruction;
+                     Type intType7 = Type.INT_TYPE;
+                     String stackValue7 = JniTypes.stackVariable("stack", operandCount + -2, intType7);
+                     source.append(stackValue7);
+                     source.append(" == ");
+                     Type intType8 = Type.INT_TYPE;
+                     String stackValue8 = JniTypes.stackVariable("stack", stackSize - 1, intType8);
+                     source.append(stackValue8);
+                     generatedSource2 = source.toString();
+                     jumpInstruction2 = (JumpInsnNode)instruction;
                      break label49;
                   case 7:
-                     Type var27 = Type.INT_TYPE;
-                     String value52 = JniTypes.stackVariable("stack", var8 + -2, var27);
-                     var6.append(value52);
-                     var6.append(" != ");
-                     Type var53 = Type.INT_TYPE;
-                     String value54 = JniTypes.stackVariable("stack", var7 - 1, var53);
-                     var6.append(value54);
-                     value80 = var6.toString();
-                     var15 = (JumpInsnNode)instruction;
+                     Type intType9 = Type.INT_TYPE;
+                     String stackValue9 = JniTypes.stackVariable("stack", operandCount + -2, intType9);
+                     source.append(stackValue9);
+                     source.append(" != ");
+                     Type intType10 = Type.INT_TYPE;
+                     String stackValue10 = JniTypes.stackVariable("stack", stackSize - 1, intType10);
+                     source.append(stackValue10);
+                     generatedSource2 = source.toString();
+                     jumpInstruction2 = (JumpInsnNode)instruction;
                      break label49;
                   case 8:
-                     Type var28 = Type.INT_TYPE;
-                     String value55 = JniTypes.stackVariable("stack", var8 + -2, var28);
-                     var6.append(value55);
-                     var6.append(" < ");
-                     Type var56 = Type.INT_TYPE;
-                     String value57 = JniTypes.stackVariable("stack", var7 - 1, var56);
-                     var6.append(value57);
-                     value80 = var6.toString();
-                     var15 = (JumpInsnNode)instruction;
+                     Type intType11 = Type.INT_TYPE;
+                     String stackValue11 = JniTypes.stackVariable("stack", operandCount + -2, intType11);
+                     source.append(stackValue11);
+                     source.append(" < ");
+                     Type intType12 = Type.INT_TYPE;
+                     String stackValue12 = JniTypes.stackVariable("stack", stackSize - 1, intType12);
+                     source.append(stackValue12);
+                     generatedSource2 = source.toString();
+                     jumpInstruction2 = (JumpInsnNode)instruction;
                      break label49;
                   case 9:
-                     Type var29 = Type.INT_TYPE;
-                     String value58 = JniTypes.stackVariable("stack", var8 + -2, var29);
-                     var6.append(value58);
-                     var6.append(" >= ");
-                     Type var59 = Type.INT_TYPE;
-                     String value60 = JniTypes.stackVariable("stack", var7 - 1, var59);
-                     var6.append(value60);
-                     value80 = var6.toString();
-                     var15 = (JumpInsnNode)instruction;
+                     Type intType13 = Type.INT_TYPE;
+                     String stackValue13 = JniTypes.stackVariable("stack", operandCount + -2, intType13);
+                     source.append(stackValue13);
+                     source.append(" >= ");
+                     Type intType14 = Type.INT_TYPE;
+                     String stackValue14 = JniTypes.stackVariable("stack", stackSize - 1, intType14);
+                     source.append(stackValue14);
+                     generatedSource2 = source.toString();
+                     jumpInstruction2 = (JumpInsnNode)instruction;
                      break label49;
                   case 10:
-                     Type var30 = Type.INT_TYPE;
-                     String value61 = JniTypes.stackVariable("stack", var8 + -2, var30);
-                     var6.append(value61);
-                     var6.append(" > ");
-                     Type var62 = Type.INT_TYPE;
-                     String value63 = JniTypes.stackVariable("stack", var7 - 1, var62);
-                     var6.append(value63);
-                     value80 = var6.toString();
-                     var15 = (JumpInsnNode)instruction;
+                     Type intType15 = Type.INT_TYPE;
+                     String stackValue15 = JniTypes.stackVariable("stack", operandCount + -2, intType15);
+                     source.append(stackValue15);
+                     source.append(" > ");
+                     Type intType16 = Type.INT_TYPE;
+                     String stackValue16 = JniTypes.stackVariable("stack", stackSize - 1, intType16);
+                     source.append(stackValue16);
+                     generatedSource2 = source.toString();
+                     jumpInstruction2 = (JumpInsnNode)instruction;
                      break label49;
                   case 11:
-                     Type var31 = Type.INT_TYPE;
-                     String value64 = JniTypes.stackVariable("stack", var8 + -2, var31);
-                     var6.append(value64);
-                     var6.append(" <= ");
-                     Type var65 = Type.INT_TYPE;
-                     String value66 = JniTypes.stackVariable("stack", var7 - 1, var65);
-                     var6.append(value66);
-                     value80 = var6.toString();
-                     var15 = (JumpInsnNode)instruction;
+                     Type intType17 = Type.INT_TYPE;
+                     String stackValue17 = JniTypes.stackVariable("stack", operandCount + -2, intType17);
+                     source.append(stackValue17);
+                     source.append(" <= ");
+                     Type intType18 = Type.INT_TYPE;
+                     String stackValue18 = JniTypes.stackVariable("stack", stackSize - 1, intType18);
+                     source.append(stackValue18);
+                     generatedSource2 = source.toString();
+                     jumpInstruction2 = (JumpInsnNode)instruction;
                      break label49;
                   case 12:
-                     String[] var32 = new String[2];
-                     Type var10 = JniTypes.OBJECT_TYPE;
-                     String value67 = JniTypes.stackVariable("stack", var8 + -2, var10);
-                     var32[0] = value67;
-                     Type var68 = JniTypes.OBJECT_TYPE;
-                     String value69 = JniTypes.stackVariable("stack", var7 - 1, var68);
-                     var32[1] = value69;
-                     String value70 = context.jniCall("IsSameObject", var32);
-                     var6.append(value70);
-                     value80 = var6.toString();
-                     var15 = (JumpInsnNode)instruction;
+                     String[] callArguments = new String[2];
+                     Type objectType = JniTypes.OBJECT_TYPE;
+                     String stackValue19 = JniTypes.stackVariable("stack", operandCount + -2, objectType);
+                     callArguments[0] = stackValue19;
+                     Type objectType2 = JniTypes.OBJECT_TYPE;
+                     String stackValue20 = JniTypes.stackVariable("stack", stackSize - 1, objectType2);
+                     callArguments[1] = stackValue20;
+                     String isSameObjectCall = context.jniCall("IsSameObject", callArguments);
+                     source.append(isSameObjectCall);
+                     generatedSource2 = source.toString();
+                     jumpInstruction2 = (JumpInsnNode)instruction;
                      break label49;
                   case 13:
-                     String value33 = "!";
-                     var6.append(value33);
-                     String[] var34 = new String[2];
-                     Type var20 = JniTypes.OBJECT_TYPE;
-                     String value71 = JniTypes.stackVariable("stack", var8 + -2, var20);
-                     var34[0] = value71;
-                     Type var72 = JniTypes.OBJECT_TYPE;
-                     String value81 = JniTypes.stackVariable("stack", var7 - 1, var72);
-                     var34[1] = value81;
-                     String value82 = context.jniCall("IsSameObject", var34);
-                     var6.append(value82);
-                     value17 = var6.toString();
-                     var14 = (JumpInsnNode)instruction;
+                     String literalText = "!";
+                     source.append(literalText);
+                     String[] callArguments2 = new String[2];
+                     Type objectType3 = JniTypes.OBJECT_TYPE;
+                     String stackValue21 = JniTypes.stackVariable("stack", operandCount + -2, objectType3);
+                     callArguments2[0] = stackValue21;
+                     Type objectType4 = JniTypes.OBJECT_TYPE;
+                     String stackValue22 = JniTypes.stackVariable("stack", stackSize - 1, objectType4);
+                     callArguments2[1] = stackValue22;
+                     String isSameObjectCall2 = context.jniCall("IsSameObject", callArguments2);
+                     source.append(isSameObjectCall2);
+                     generatedSource = source.toString();
+                     jumpInstruction = (JumpInsnNode)instruction;
                      break label50;
                   case 14:
                      if (!context.getOptions().isFlowObfuscationEnabled()) {
-                        String value73 = "1";
-                        var6.append(value73);
-                        String value83 = var6.toString();
-                        LabelNode var74 = ((JumpInsnNode)instruction).label;
-                        return jumps.jumpIf(value83, var74) + "\n";
+                        String oneLiteral = "1";
+                        source.append(oneLiteral);
+                        String generatedSource4 = source.toString();
+                        LabelNode targetLabel = ((JumpInsnNode)instruction).label;
+                        return jumps.jumpIf(generatedSource4, targetLabel) + "\n";
                      }
 
-                     String value75 = context.getLiterals().encryptedInteger(ThreadLocalRandom.current().nextInt(1, Integer.MAX_VALUE));
-                     var6.append(value75);
-                     String value35 = var6.toString();
-                     LabelNode var76 = ((JumpInsnNode)instruction).label;
-                     return jumps.jumpIf(value35, var76) + "\n";
+                     String encryptedValue = context.getLiterals().encryptedInteger(ThreadLocalRandom.current().nextInt(1, Integer.MAX_VALUE));
+                     source.append(encryptedValue);
+                     String generatedSource5 = source.toString();
+                     LabelNode targetLabel2 = ((JumpInsnNode)instruction).label;
+                     return jumps.jumpIf(generatedSource5, targetLabel2) + "\n";
                   case 15:
                   case 16:
                   case 17:
@@ -232,32 +232,32 @@ public class JumpTransformer extends OpcodeTransformer {
                   default:
                      throw new AssertionError();
                   case 45:
-                     Type var36 = JniTypes.OBJECT_TYPE;
-                     String value77 = JniTypes.stackVariable("stack", var7 - 1, var36);
-                     var6.append(value77);
-                     var6.append(" == NULL");
-                     value78 = var6.toString();
-                     var16 = (JumpInsnNode)instruction;
+                     Type objectType5 = JniTypes.OBJECT_TYPE;
+                     String stackValue23 = JniTypes.stackVariable("stack", stackSize - 1, objectType5);
+                     source.append(stackValue23);
+                     source.append(" == NULL");
+                     generatedSource3 = source.toString();
+                     jumpInstruction3 = (JumpInsnNode)instruction;
                      break;
                   case 46:
-                     Type var37 = JniTypes.OBJECT_TYPE;
-                     String value79 = JniTypes.stackVariable("stack", var7 - 1, var37);
-                     var6.append(value79);
-                     var6.append(" != NULL");
-                     value78 = var6.toString();
-                     var16 = (JumpInsnNode)instruction;
+                     Type objectType6 = JniTypes.OBJECT_TYPE;
+                     String stackValue24 = JniTypes.stackVariable("stack", stackSize - 1, objectType6);
+                     source.append(stackValue24);
+                     source.append(" != NULL");
+                     generatedSource3 = source.toString();
+                     jumpInstruction3 = (JumpInsnNode)instruction;
                }
 
-               LabelNode var19 = var16.label;
-               return jumps.jumpIf(value78, var19) + "\n";
+               LabelNode targetLabel3 = jumpInstruction3.label;
+               return jumps.jumpIf(generatedSource3, targetLabel3) + "\n";
             }
 
-            LabelNode var18 = var15.label;
-            return jumps.jumpIf(value80, var18) + "\n";
+            LabelNode targetLabel4 = jumpInstruction2.label;
+            return jumps.jumpIf(generatedSource2, targetLabel4) + "\n";
          }
 
-         LabelNode var13 = var14.label;
-         return jumps.jumpIf(value17, var13) + "\n";
+         LabelNode targetLabel5 = jumpInstruction.label;
+         return jumps.jumpIf(generatedSource, targetLabel5) + "\n";
       } else {
          throw new AssertionError();
       }

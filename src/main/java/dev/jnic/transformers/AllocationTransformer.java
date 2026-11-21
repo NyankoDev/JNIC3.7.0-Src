@@ -22,169 +22,169 @@ public class AllocationTransformer extends OpcodeTransformer {
 
    @Override
    public String transform(CompilationContext context, AbstractInsnNode instruction, OperandStack stack, JumpEmitter jumps, String ownerName) {
-      StringBuilder var6 = new StringBuilder();
-      int var7 = stack.sizeBefore();
-      int var8 = instruction.getOpcode();
-      if (var8 <= 188) {
-         if (var8 == 187) {
-            int var46 = stack.sizeBefore();
-            Type var28 = JniTypes.OBJECT_TYPE;
-            String value29 = JniTypes.stackVariable("stack", var46, var28);
-            var6.append(value29);
-            var6.append(" = ");
-            String[] var44 = new String[1];
-            String value41 = context.getClassCache().classReference(((TypeInsnNode)instruction).desc);
-            var44[0] = value41;
-            String value42 = context.jniCall("AllocObject", var44);
-            var6.append(value42);
-            var6.append(";\n");
-            return var6.toString();
+      StringBuilder source = new StringBuilder();
+      int stackSizeBefore = stack.sizeBefore();
+      int opcode = instruction.getOpcode();
+      if (opcode <= 188) {
+         if (opcode == 187) {
+            int stackSizeBefore2 = stack.sizeBefore();
+            Type objectType = JniTypes.OBJECT_TYPE;
+            String stackValue = JniTypes.stackVariable("stack", stackSizeBefore2, objectType);
+            source.append(stackValue);
+            source.append(" = ");
+            String[] callArguments = new String[1];
+            String classReference = context.getClassCache().classReference(((TypeInsnNode)instruction).desc);
+            callArguments[0] = classReference;
+            String allocObjectCall = context.jniCall("AllocObject", callArguments);
+            source.append(allocObjectCall);
+            source.append(";\n");
+            return source.toString();
          }
 
-         if (var8 != 188) {
+         if (opcode != 188) {
             throw new AssertionError();
          }
 
-         Type var25 = JniTypes.OBJECT_TYPE;
-         String value30 = JniTypes.stackVariable("stack", var7 - 1, var25);
-         var6.append(value30);
-         var6.append(" = ");
-         Type var31 = JniTypes.newArrayType((IntInsnNode)instruction);
-         Type var45 = Type.INT_TYPE;
-         String value33 = JniTypes.stackVariable("stack", var7 - 1, var45);
-         String value43 = this.allocateArray(context, var31, value33);
-         var6.append(value43);
-         var6.append(";\n");
-         return var6.toString();
+         Type objectType2 = JniTypes.OBJECT_TYPE;
+         String stackValue2 = JniTypes.stackVariable("stack", stackSizeBefore - 1, objectType2);
+         source.append(stackValue2);
+         source.append(" = ");
+         Type elementType = JniTypes.newArrayType((IntInsnNode)instruction);
+         Type intType = Type.INT_TYPE;
+         String stackValue3 = JniTypes.stackVariable("stack", stackSizeBefore - 1, intType);
+         String arrayAllocation = this.allocateArray(context, elementType, stackValue3);
+         source.append(arrayAllocation);
+         source.append(";\n");
+         return source.toString();
       } else {
-         if (var8 == 189) {
-            Type var9 = JniTypes.OBJECT_TYPE;
-            String value10 = JniTypes.stackVariable("stack", var7 - 1, var9);
-            var6.append(value10);
-            var6.append(" = ");
-            Type var26 = Type.getObjectType(((TypeInsnNode)instruction).desc);
-            Type var11 = Type.INT_TYPE;
-            String value15 = JniTypes.stackVariable("stack", var7 - 1, var11);
-            String value40 = this.allocateArray(context, var26, value15);
-            var6.append(value40);
-            var6.append(";\n");
-            return var6.toString();
+         if (opcode == 189) {
+            Type objectType3 = JniTypes.OBJECT_TYPE;
+            String stackValue4 = JniTypes.stackVariable("stack", stackSizeBefore - 1, objectType3);
+            source.append(stackValue4);
+            source.append(" = ");
+            Type objectType4 = Type.getObjectType(((TypeInsnNode)instruction).desc);
+            Type intType2 = Type.INT_TYPE;
+            String stackValue5 = JniTypes.stackVariable("stack", stackSizeBefore - 1, intType2);
+            String arrayAllocation2 = this.allocateArray(context, objectType4, stackValue5);
+            source.append(arrayAllocation2);
+            source.append(";\n");
+            return source.toString();
          }
 
-         if (var8 != 197) {
+         if (opcode != 197) {
             throw new AssertionError();
          }
 
-         MultiANewArrayInsnNode var24 = (MultiANewArrayInsnNode)instruction;
-         Type var16 = Type.getType(var24.desc);
-         int var17 = var24.dims;
-         var6.append("{\n");
-         String value27 = this.indentation(2);
-         var6.append(value27);
-         var6.append("jsize dim[] = {");
-         IntStream var10000 = IntStream.range(var7 - 1 - var17 + 1, var7 - 1 + 1);
-         IntFunction<String> function56 = index -> {
-            Type var8x = Type.INT_TYPE;
-            return JniTypes.stackVariable("stack", index, var8x);
+         MultiANewArrayInsnNode arrayInstruction = (MultiANewArrayInsnNode)instruction;
+         Type type = Type.getType(arrayInstruction.desc);
+         int dims = arrayInstruction.dims;
+         source.append("{\n");
+         String indentation = this.indentation(2);
+         source.append(indentation);
+         source.append("jsize dim[] = {");
+         IntStream intStream = IntStream.range(stackSizeBefore - 1 - dims + 1, stackSizeBefore - 1 + 1);
+         IntFunction<String> arrayFactory = index -> {
+            Type intType3 = Type.INT_TYPE;
+            return JniTypes.stackVariable("stack", index, intType3);
          };
-         String var32 = var10000.mapToObj(function56).collect(Collectors.joining(", "));
-         var6.append(var32);
-         var6.append("};");
-         int var18 = 0;
-         int var12 = var24.dims;
+         String joinedValues = intStream.mapToObj(arrayFactory).collect(Collectors.joining(", "));
+         source.append(joinedValues);
+         source.append("};");
+         int dimensionIndex = 0;
+         int dims2 = arrayInstruction.dims;
 
-         while (var18 < var12) {
+         while (dimensionIndex < dims2) {
             label49: {
-               String value47 = this.indentation(var18 + 2);
-               var6.append(value47);
-               Type var48 = JniTypes.OBJECT_TYPE;
-               String value49 = JniTypes.stackVariable("stack", var18 + var7 - 1 - var17 + 1, var48);
-               var6.append(value49);
-               var6.append(" = ");
-               Type var50 = this.componentType(var16, var18 + 1);
-               String value14 = "]";
-               String var13 = "dim[" + var18 + value14;
-               String value51 = this.allocateArray(context, var50, var13);
-               var6.append(value51);
-               var6.append(";\n");
-               if (var18 <= 0) {
-                  if (var24.dims - 1 <= var18) {
+               String indentation2 = this.indentation(dimensionIndex + 2);
+               source.append(indentation2);
+               Type objectType5 = JniTypes.OBJECT_TYPE;
+               String stackValue6 = JniTypes.stackVariable("stack", dimensionIndex + stackSizeBefore - 1 - dims + 1, objectType5);
+               source.append(stackValue6);
+               source.append(" = ");
+               Type type2 = this.componentType(type, dimensionIndex + 1);
+               String literalText = "]";
+               String expression = "dim[" + dimensionIndex + literalText;
+               String arrayAllocation3 = this.allocateArray(context, type2, expression);
+               source.append(arrayAllocation3);
+               source.append(";\n");
+               if (dimensionIndex <= 0) {
+                  if (arrayInstruction.dims - 1 <= dimensionIndex) {
                      break label49;
                   }
                } else {
-                  String value53 = this.indentation(var18 + 2);
-                  var6.append(value53);
-                  String[] var34 = new String[3];
-                  Type var35 = JniTypes.OBJECT_TYPE;
-                  String value36 = JniTypes.stackVariable("stack", var7 - 1 - var17 + 1 + var18 - 1, var35);
-                  var34[0] = value36;
-                  String var37 = "d" + (var18 - 1);
-                  var34[1] = var37;
-                  Type var38 = JniTypes.OBJECT_TYPE;
-                  String value39 = JniTypes.stackVariable("stack", var7 - 1 - var17 + 1 + var18, var38);
-                  var34[2] = value39;
-                  String value54 = context.jniCall("SetObjectArrayElement", var34);
-                  var6.append(value54);
-                  var6.append(";\n");
-                  if (var24.dims - 1 <= var18) {
+                  String indentation3 = this.indentation(dimensionIndex + 2);
+                  source.append(indentation3);
+                  String[] callArguments2 = new String[3];
+                  Type objectType6 = JniTypes.OBJECT_TYPE;
+                  String stackValue7 = JniTypes.stackVariable("stack", stackSizeBefore - 1 - dims + 1 + dimensionIndex - 1, objectType6);
+                  callArguments2[0] = stackValue7;
+                  String expression2 = "d" + (dimensionIndex - 1);
+                  callArguments2[1] = expression2;
+                  Type objectType7 = JniTypes.OBJECT_TYPE;
+                  String stackValue8 = JniTypes.stackVariable("stack", stackSizeBefore - 1 - dims + 1 + dimensionIndex, objectType7);
+                  callArguments2[2] = stackValue8;
+                  String setObjectArrayElementCall = context.jniCall("SetObjectArrayElement", callArguments2);
+                  source.append(setObjectArrayElementCall);
+                  source.append(";\n");
+                  if (arrayInstruction.dims - 1 <= dimensionIndex) {
                      break label49;
                   }
                }
 
-               String value52 = this.indentation(var18 + 2);
-               var6.append(value52);
-               var6.append("for(jsize d");
-               var6.append(var18);
-               var6.append(" = 0; d");
-               var6.append(var18);
-               var6.append(" < dim[");
-               var6.append(var18);
-               var6.append("]; d");
-               var6.append(var18);
-               var6.append("++) {\n");
-               int var55 = var24.dims;
-               int var57 = var18 + 1;
-               var12 = var55;
-               var18 = var57;
+               String indentation4 = this.indentation(dimensionIndex + 2);
+               source.append(indentation4);
+               source.append("for(jsize d");
+               source.append(dimensionIndex);
+               source.append(" = 0; d");
+               source.append(dimensionIndex);
+               source.append(" < dim[");
+               source.append(dimensionIndex);
+               source.append("]; d");
+               source.append(dimensionIndex);
+               source.append("++) {\n");
+               int dims3 = arrayInstruction.dims;
+               int nextIndex = dimensionIndex + 1;
+               dims2 = dims3;
+               dimensionIndex = nextIndex;
                continue;
             }
 
-            int var23 = var24.dims;
-            int var58 = var18 + 1;
-            var12 = var23;
-            var18 = var58;
+            int dims4 = arrayInstruction.dims;
+            int nextIndex2 = dimensionIndex + 1;
+            dims2 = dims4;
+            dimensionIndex = nextIndex2;
          }
 
-         for (int var20 = var24.dims - 2; var20 >= 0; var20--) {
-            String value22 = this.indentation(var20 + 2);
-            var6.append(value22);
-            var6.append("}\n");
+         for (int nestedDimension = arrayInstruction.dims - 2; nestedDimension >= 0; nestedDimension--) {
+            String indentation5 = this.indentation(nestedDimension + 2);
+            source.append(indentation5);
+            source.append("}\n");
          }
 
-         var6.append("    }\n;\n");
-         return var6.toString();
+         source.append("    }\n;\n");
+         return source.toString();
       }
    }
 
    private String allocateArray(CompilationContext context, Type type, String text) {
-      int var4 = type.getSort();
-      if (var4 == 10) {
-         String[] var12 = new String[]{text, null, null};
-         String value15 = context.getClassCache().classReference(type.getInternalName());
-         var12[1] = value15;
-         var12[2] = "NULL";
-         return context.jniCall("NewObjectArray", var12);
-      } else if (var4 != 9) {
-         String value5 = JniTypes.jniTypeSuffix(type);
-         String var21 = "New" + value5 + "Array";
-         String[] var22 = new String[]{text};
-         return context.jniCall(var21, var22);
+      int typeSort = type.getSort();
+      if (typeSort == 10) {
+         String[] callArguments = new String[]{text, null, null};
+         String classReference = context.getClassCache().classReference(type.getInternalName());
+         callArguments[1] = classReference;
+         callArguments[2] = "NULL";
+         return context.jniCall("NewObjectArray", callArguments);
+      } else if (typeSort != 9) {
+         String typeSuffix = JniTypes.jniTypeSuffix(type);
+         String expression = "New" + typeSuffix + "Array";
+         String[] callArguments2 = new String[]{text};
+         return context.jniCall(expression, callArguments2);
       } else {
-         String[] var23 = new String[]{text, null, null};
-         String value24 = context.getClassCache().classReference(type.getInternalName());
-         var23[1] = value24;
-         var23[2] = "NULL";
-         return context.jniCall("NewObjectArray", var23);
+         String[] callArguments3 = new String[]{text, null, null};
+         String classReference2 = context.getClassCache().classReference(type.getInternalName());
+         callArguments3[1] = classReference2;
+         callArguments3[2] = "NULL";
+         return context.jniCall("NewObjectArray", callArguments3);
       }
    }
 
@@ -193,7 +193,7 @@ public class AllocationTransformer extends OpcodeTransformer {
    }
 
    private String indentation(int index) {
-      Supplier<String> function2 = () -> "    ";
-      return Stream.generate(function2).limit(index).collect(Collectors.joining());
+      Supplier<String> factory = () -> "    ";
+      return Stream.generate(factory).limit(index).collect(Collectors.joining());
    }
 }

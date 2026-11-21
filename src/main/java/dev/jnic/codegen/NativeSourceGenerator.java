@@ -20,98 +20,98 @@ public class NativeSourceGenerator implements SourceGenerator {
    }
 
    private static String characterArray(String text, String text2) {
-      StringBuilder var4 = new StringBuilder();
-      String value6 = "(";
-      var4.append(value6);
-      var4.append(text2);
-      var4.append("[]) {");
+      StringBuilder source = new StringBuilder();
+      String openingParenthesis = "(";
+      source.append(openingParenthesis);
+      source.append(text2);
+      source.append("[]) {");
       if (text == null) {
          throw new NullPointerException("");
       }
 
-      int var10000 = text.length();
-      int var30 = 0;
-      int var32 = var10000;
+      int textLength = text.length();
+      int characterIndex = 0;
+      int textLength2 = textLength;
 
-      while (var30 < var32) {
-         char var36 = text.charAt(var30);
-         var4.append((int)var36);
-         var4.append(", ");
+      while (characterIndex < textLength2) {
+         char character = text.charAt(characterIndex);
+         source.append((int)character);
+         source.append(", ");
          if (text == null) {
             throw new NullPointerException("");
          }
 
-         int var55 = text.length();
-         var10000 = var30 + 1;
-         var32 = var55;
-         var30 = var10000;
+         int textLength3 = text.length();
+         textLength = characterIndex + 1;
+         textLength2 = textLength3;
+         characterIndex = textLength;
       }
 
-      var4.append("0}");
-      return var4.toString();
+      source.append("0}");
+      return source.toString();
    }
 
    private static String randomizeKeyBytes(int index) {
-      StringBuilder var3 = new StringBuilder();
-      int var10000 = ThreadLocalRandom.current().nextInt(32);
-      int var10001 = ThreadLocalRandom.current().nextInt(256);
-      int var13 = 0;
-      int var15 = var10001;
-      int var16 = var10000;
+      StringBuilder source = new StringBuilder();
+      int randomValue = ThreadLocalRandom.current().nextInt(32);
+      int randomValue2 = ThreadLocalRandom.current().nextInt(256);
+      int assignmentCount = 0;
+      int randomValue3 = randomValue2;
+      int randomValue4 = randomValue;
 
       while (true) {
-         int var30 = Math.max(0, index);
-         String value32 = "    ".repeat(var30);
-         var3.append(value32);
-         var3.append("key[");
-         var3.append(var16);
-         var3.append("] = ");
-         var3.append(var15);
-         var3.append(";\n");
-         if (var13 + 1 >= 3) {
-            return var3.toString();
+         int indentationLevel = Math.max(0, index);
+         String indentation = "    ".repeat(indentationLevel);
+         source.append(indentation);
+         source.append("key[");
+         source.append(randomValue4);
+         source.append("] = ");
+         source.append(randomValue3);
+         source.append(";\n");
+         if (assignmentCount + 1 >= 3) {
+            return source.toString();
          }
 
-         int var87 = ThreadLocalRandom.current().nextInt(32);
-         int var91 = ThreadLocalRandom.current().nextInt(256);
-         var10000 = var13 + 1;
-         var16 = var87;
-         var15 = var91;
-         var13 = var10000;
+         int randomValue5 = ThreadLocalRandom.current().nextInt(32);
+         int randomValue6 = ThreadLocalRandom.current().nextInt(256);
+         randomValue = assignmentCount + 1;
+         randomValue4 = randomValue5;
+         randomValue3 = randomValue6;
+         assignmentCount = randomValue;
       }
    }
 
    @Override
    public String generate(CompilationContext context) {
-      String value2 = new NativeRegistrationGenerator(this.methods, this.flags).generate(context);
+      String generatedSource = new NativeRegistrationGenerator(this.methods, this.flags).generate(context);
       if (Jnic.getLicense() == null) {
          throw new RuntimeException("missing licence");
       }
 
-      StringBuilder var3 = new StringBuilder(1024);
-      var3.append(SOURCE_HEADER);
+      StringBuilder source = new StringBuilder(1024);
+      source.append(SOURCE_HEADER);
       context.getOptions();
       if (context.getOptions().isStringObfuscationEnabled() || context.getOptions().isFlowObfuscationEnabled()) {
-         var3.append("const uint8_t *magic_constant = (uint8_t*) \"")
+         source.append("const uint8_t *magic_constant = (uint8_t*) \"")
             .append(Jnic.CHACHA_MAGIC)
             .append("\";\n")
             .append("#include <crypto.h>\nstatic uint8_t *jnic_buf;\n\n");
       }
 
       if (context.getOptions().isStringObfuscationEnabled()) {
-         var3.append("static inline void* jnic_decrypt(char *a, size_t offset, const size_t len) {\n")
+         source.append("static inline void* jnic_decrypt(char *a, size_t offset, const size_t len) {\n")
             .append("    for(size_t i = 0; i < len; i++) a[i] ^= jnic_buf[offset + i]; return a;\n}\n");
       }
 
       context.getOptions();
-      var3.append(context.getClassCache().generate()).append(value2);
+      source.append(context.getClassCache().generate()).append(generatedSource);
       context.getOptions();
       if (context.getOptions().isStringObfuscationEnabled() || context.getOptions().isFlowObfuscationEnabled()) {
-         this.appendNativeInitializer(var3, context);
+         this.appendNativeInitializer(source, context);
       }
 
       context.getOptions();
-      return var3.append(SOURCE_FOOTER).toString();
+      return source.append(SOURCE_FOOTER).toString();
    }
 
    private void appendNativeInitializer(StringBuilder stringBuilder, CompilationContext context) {
@@ -126,8 +126,8 @@ public class NativeSourceGenerator implements SourceGenerator {
       context.getOptions();
       stringBuilder.append("    uint8_t key[32] = {");
 
-      for (byte var6 : context.getLiterals().getKeystream().getKey()) {
-         stringBuilder.append(var6).append(", ");
+      for (byte byteValue : context.getLiterals().getKeystream().getKey()) {
+         stringBuilder.append(byteValue).append(", ");
       }
 
       stringBuilder.append("};\n");

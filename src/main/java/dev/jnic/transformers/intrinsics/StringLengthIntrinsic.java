@@ -14,38 +14,38 @@ public class StringLengthIntrinsic extends IntrinsicTransformer {
 
    @Override
    public String transform(CompilationContext context, AbstractInsnNode instruction, OperandStack stack, JumpEmitter jumps, String ownerName) {
-      int var6 = stack.sizeBefore();
-      Type var14 = JniTypes.OBJECT_TYPE;
-      String value15 = JniTypes.stackVariable("stack", var6 - 1, var14);
-      Type var23 = Type.INT_TYPE;
-      String value24 = JniTypes.stackVariable("stack", var6 - 1, var23);
-      StringBuilder var26 = new StringBuilder();
-      if (stack.mayBeNull(var6 - 1)) {
-         var26.append("if (");
-         var26.append(value15);
-         var26.append(" == NULL) ");
-         String[] var52 = new String[2];
-         String value61 = context.getClassCache().classReference("java/lang/NullPointerException");
-         var52[0] = value61;
-         var52[1] = "\"\"";
-         String var69 = "(void)(" + context.jniCall("ThrowNew", var52) + ")";
-         var26.append(var69);
-         var26.append(";\n    else ");
-         var26.append(value24);
-         var26.append(" = ");
-         String[] var103 = new String[]{value15};
-         String value104 = context.jniCall("GetStringLength", var103);
-         var26.append(value104);
-         var26.append(";\n");
-         return var26.toString();
+      int stackSizeBefore = stack.sizeBefore();
+      Type objectType = JniTypes.OBJECT_TYPE;
+      String stackValue = JniTypes.stackVariable("stack", stackSizeBefore - 1, objectType);
+      Type intType = Type.INT_TYPE;
+      String stackValue2 = JniTypes.stackVariable("stack", stackSizeBefore - 1, intType);
+      StringBuilder builder = new StringBuilder();
+      if (stack.mayBeNull(stackSizeBefore - 1)) {
+         builder.append("if (");
+         builder.append(stackValue);
+         builder.append(" == NULL) ");
+         String[] callArguments = new String[2];
+         String classReference = context.getClassCache().classReference("java/lang/NullPointerException");
+         callArguments[0] = classReference;
+         callArguments[1] = "\"\"";
+         String expression = "(void)(" + context.jniCall("ThrowNew", callArguments) + ")";
+         builder.append(expression);
+         builder.append(";\n    else ");
+         builder.append(stackValue2);
+         builder.append(" = ");
+         String[] callArguments2 = new String[]{stackValue};
+         String getStringLengthCall = context.jniCall("GetStringLength", callArguments2);
+         builder.append(getStringLengthCall);
+         builder.append(";\n");
+         return builder.toString();
       } else {
-         var26.append(value24);
-         var26.append(" = ");
-         String[] var44 = new String[]{value15};
-         String value45 = context.jniCall("GetStringLength", var44);
-         var26.append(value45);
-         var26.append(";\n");
-         return var26.toString();
+         builder.append(stackValue2);
+         builder.append(" = ");
+         String[] callArguments3 = new String[]{stackValue};
+         String getStringLengthCall2 = context.jniCall("GetStringLength", callArguments3);
+         builder.append(getStringLengthCall2);
+         builder.append(";\n");
+         return builder.toString();
       }
    }
 }

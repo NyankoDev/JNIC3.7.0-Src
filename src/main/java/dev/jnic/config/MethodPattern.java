@@ -25,37 +25,37 @@ public class MethodPattern {
          if (this.className == null) {
             if (this.methodName == null) {
                if (this.methodDesc != null) {
-                  Pattern var1 = Pattern.compile(this.methodDesc);
-                  this.descriptorPattern = var1;
+                  Pattern pattern = Pattern.compile(this.methodDesc);
+                  this.descriptorPattern = pattern;
                }
             } else {
-               Pattern var3 = Pattern.compile(this.methodName);
-               this.methodPattern = var3;
+               Pattern pattern2 = Pattern.compile(this.methodName);
+               this.methodPattern = pattern2;
                if (this.methodDesc != null) {
-                  Pattern var4 = Pattern.compile(this.methodDesc);
-                  this.descriptorPattern = var4;
+                  Pattern pattern3 = Pattern.compile(this.methodDesc);
+                  this.descriptorPattern = pattern3;
                }
             }
          } else {
-            Pattern var5 = Pattern.compile(this.className);
-            this.classPattern = var5;
+            Pattern pattern4 = Pattern.compile(this.className);
+            this.classPattern = pattern4;
             if (this.methodName == null) {
                if (this.methodDesc != null) {
-                  Pattern var6 = Pattern.compile(this.methodDesc);
-                  this.descriptorPattern = var6;
+                  Pattern pattern5 = Pattern.compile(this.methodDesc);
+                  this.descriptorPattern = pattern5;
                }
             } else {
-               Pattern var7 = Pattern.compile(this.methodName);
-               this.methodPattern = var7;
+               Pattern pattern6 = Pattern.compile(this.methodName);
+               this.methodPattern = pattern6;
                if (this.methodDesc != null) {
-                  Pattern var8 = Pattern.compile(this.methodDesc);
-                  this.descriptorPattern = var8;
+                  Pattern pattern7 = Pattern.compile(this.methodDesc);
+                  this.descriptorPattern = pattern7;
                }
             }
          }
-      } catch (PatternSyntaxException var10) {
-         String var2 = INVALID_REGEX;
-         throw new ConfigurationException(var2, var10);
+      } catch (PatternSyntaxException patternSyntaxFailure) {
+         String invalidRegex = INVALID_REGEX;
+         throw new ConfigurationException(invalidRegex, patternSyntaxFailure);
       }
    }
 

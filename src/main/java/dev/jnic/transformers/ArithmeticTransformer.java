@@ -57,69 +57,69 @@ public class ArithmeticTransformer extends OpcodeTransformer {
 
    @Override
    public String transform(CompilationContext context, AbstractInsnNode instruction, OperandStack stack, JumpEmitter jumps, String ownerName) {
-      int var6 = stack.sizeBefore() - 2;
-      int var7 = stack.sizeBefore() - 1;
-      int var8 = instruction.getOpcode();
-      if (var8 >= 96 && var8 <= 115) {
-         char var9 = "ijfd".charAt(var8 & 3);
-         String value10 = arithmeticVariable("stack", var6, var9);
-         String value11 = arithmeticVariable("stack", var7, var9);
-         String value12 = var9 == 'i' ? "(unsigned int) " : (var9 == 'j' ? "(unsigned long long) " : "");
-         String var10000;
-         switch ((var8 - 96) / 4) {
+      int secondStackIndex = stack.sizeBefore() - 2;
+      int topStackIndex = stack.sizeBefore() - 1;
+      int opcode = instruction.getOpcode();
+      if (opcode >= 96 && opcode <= 115) {
+         char character = "ijfd".charAt(opcode & 3);
+         String arithmeticOperand = arithmeticVariable("stack", secondStackIndex, character);
+         String arithmeticOperand2 = arithmeticVariable("stack", topStackIndex, character);
+         String literalText = character == 'i' ? "(unsigned int) " : (character == 'j' ? "(unsigned long long) " : "");
+         String expression;
+         switch ((opcode - 96) / 4) {
             case 0:
-               var10000 = value10 + " = " + value12 + value10 + " + " + value11 + ";\n";
+               expression = arithmeticOperand + " = " + literalText + arithmeticOperand + " + " + arithmeticOperand2 + ";\n";
                break;
             case 1:
-               var10000 = value10 + " = " + value12 + value10 + " - " + value11 + ";\n";
+               expression = arithmeticOperand + " = " + literalText + arithmeticOperand + " - " + arithmeticOperand2 + ";\n";
                break;
             case 2:
-               var10000 = value10 + " = " + value12 + value10 + " * " + value11 + ";\n";
+               expression = arithmeticOperand + " = " + literalText + arithmeticOperand + " * " + arithmeticOperand2 + ";\n";
                break;
             case 3:
-               var10000 = arithmeticDivision(value10, value11, var9, false);
+               expression = arithmeticDivision(arithmeticOperand, arithmeticOperand2, character, false);
                break;
             case 4:
-               var10000 = arithmeticDivision(value10, value11, var9, true);
+               expression = arithmeticDivision(arithmeticOperand, arithmeticOperand2, character, true);
                break;
             default:
                throw new AssertionError();
          }
 
-         return var10000;
-      } else if (var8 >= 116 && var8 <= 119) {
-         char var13 = "ijfd".charAt(var8 & 3);
-         String value18 = arithmeticVariable("stack", var7, var13);
-         return value18 + " = -" + (var13 == 'i' ? "(unsigned int) " : (var13 == 'j' ? "(unsigned long long) " : "")) + value18 + ";\n";
-      } else if (var8 >= 120 && var8 <= 125) {
-         boolean var14 = (var8 & 1) != 0;
-         String value19 = arithmeticVariable("stack", var6, (char)(var14 ? 'j' : 'i'));
-         String var23 = "(" + arithmeticVariable("stack", var7, 'i') + " & " + (var14 ? "0x3f" : "0x1f") + ")";
-         return var8 >= 124
-            ? value19 + " = " + (var14 ? "(jlong) ((unsigned long long)" : "(jint) ((unsigned int)") + value19 + " >> " + var23 + ");\n"
-            : value19
+         return expression;
+      } else if (opcode >= 116 && opcode <= 119) {
+         char character2 = "ijfd".charAt(opcode & 3);
+         String arithmeticOperand3 = arithmeticVariable("stack", topStackIndex, character2);
+         return arithmeticOperand3 + " = -" + (character2 == 'i' ? "(unsigned int) " : (character2 == 'j' ? "(unsigned long long) " : "")) + arithmeticOperand3 + ";\n";
+      } else if (opcode >= 120 && opcode <= 125) {
+         boolean matches = (opcode & 1) != 0;
+         String arithmeticOperand4 = arithmeticVariable("stack", secondStackIndex, (char)(matches ? 'j' : 'i'));
+         String expression2 = "(" + arithmeticVariable("stack", topStackIndex, 'i') + " & " + (matches ? "0x3f" : "0x1f") + ")";
+         return opcode >= 124
+            ? arithmeticOperand4 + " = " + (matches ? "(jlong) ((unsigned long long)" : "(jint) ((unsigned int)") + arithmeticOperand4 + " >> " + expression2 + ");\n"
+            : arithmeticOperand4
                + " = "
-               + (var8 < 122 ? (var14 ? "(unsigned long long) " : "(unsigned int) ") : "")
-               + value19
-               + (var8 < 122 ? " << " : " >> ")
-               + var23
+               + (opcode < 122 ? (matches ? "(unsigned long long) " : "(unsigned int) ") : "")
+               + arithmeticOperand4
+               + (opcode < 122 ? " << " : " >> ")
+               + expression2
                + ";\n";
-      } else if (var8 >= 126 && var8 <= 131) {
-         int var15 = (var8 & 1) == 0 ? 105 : 106;
-         String value20 = arithmeticVariable("stack", var6, (char)var15);
-         String value24 = arithmeticVariable("stack", var7, (char)var15);
-         String value26 = var8 < 128 ? " & " : (var8 < 130 ? " | " : " ^ ");
-         return value20 + " = " + value20 + value26 + value24 + ";\n";
-      } else if (var8 == 132) {
-         IincInsnNode var16 = (IincInsnNode)instruction;
-         String value21 = arithmeticVariable("local", var16.var, 'i');
-         return value21 + " = (unsigned int) " + value21 + " + " + var16.incr + ";\n";
-      } else if (var8 >= 148 && var8 <= 152) {
-         int var17 = var8 == 148 ? 106 : (var8 <= 150 ? 102 : 100);
-         String value22 = arithmeticVariable("stack", var6, (char)var17);
-         String value25 = arithmeticVariable("stack", var7, (char)var17);
-         String var27 = "stack" + var6 + ".i = " + value22 + " < " + value25 + " ? -1 : " + value22 + " > " + value25 + " ? 1 : ";
-         return var8 == 148 ? var27 + "0;\n" : var27 + value22 + " == " + value25 + " ? 0 : " + ((var8 & 1) == 0 ? "1" : "-1") + ";\n";
+      } else if (opcode >= 126 && opcode <= 131) {
+         int shiftSlot = (opcode & 1) == 0 ? 105 : 106;
+         String arithmeticOperand5 = arithmeticVariable("stack", secondStackIndex, (char)shiftSlot);
+         String arithmeticOperand6 = arithmeticVariable("stack", topStackIndex, (char)shiftSlot);
+         String literalText2 = opcode < 128 ? " & " : (opcode < 130 ? " | " : " ^ ");
+         return arithmeticOperand5 + " = " + arithmeticOperand5 + literalText2 + arithmeticOperand6 + ";\n";
+      } else if (opcode == 132) {
+         IincInsnNode increment = (IincInsnNode)instruction;
+         String arithmeticOperand7 = arithmeticVariable("local", increment.var, 'i');
+         return arithmeticOperand7 + " = (unsigned int) " + arithmeticOperand7 + " + " + increment.incr + ";\n";
+      } else if (opcode >= 148 && opcode <= 152) {
+         int comparisonSlot = opcode == 148 ? 106 : (opcode <= 150 ? 102 : 100);
+         String arithmeticOperand8 = arithmeticVariable("stack", secondStackIndex, (char)comparisonSlot);
+         String arithmeticOperand9 = arithmeticVariable("stack", topStackIndex, (char)comparisonSlot);
+         String expression3 = "stack" + secondStackIndex + ".i = " + arithmeticOperand8 + " < " + arithmeticOperand9 + " ? -1 : " + arithmeticOperand8 + " > " + arithmeticOperand9 + " ? 1 : ";
+         return opcode == 148 ? expression3 + "0;\n" : expression3 + arithmeticOperand8 + " == " + arithmeticOperand9 + " ? 0 : " + ((opcode & 1) == 0 ? "1" : "-1") + ";\n";
       } else {
          throw new AssertionError();
       }
@@ -135,7 +135,7 @@ public class ArithmeticTransformer extends OpcodeTransformer {
 
    private static String arithmeticDivision(String text, String text2, char value, boolean enabled) {
       if (value != 'f' && value != 'd') {
-         String value4 = value == 'i' ? "(jint) 0x80000000" : "(jlong) 0x8000000000000000LL";
+         String literalText = value == 'i' ? "(jint) 0x80000000" : "(jlong) 0x8000000000000000LL";
          return "if ("
             + text2
             + " == 0) {\n    jclass exception = (*env)->FindClass(env, \"java/lang/ArithmeticException\");\n    if (exception != NULL) { (*env)->ThrowNew(env, exception, \"/ by zero\"); (*env)->DeleteLocalRef(env, exception); }\n} else "
@@ -143,7 +143,7 @@ public class ArithmeticTransformer extends OpcodeTransformer {
             + " = "
             + text
             + " == "
-            + value4
+            + literalText
             + " && "
             + text2
             + " == -1 ? "

@@ -19,9 +19,9 @@ public class OaepEncoder {
    }
 
    public int inputSize() {
-      int var10000 = this.engine.inputSize();
-      int var4 = this.labelHash.length;
-      return var10000 + ~(var4 + var4);
+      int inputSize = this.engine.inputSize();
+      int labelHashCount = this.labelHash.length;
+      return inputSize + ~(labelHashCount + labelHashCount);
    }
 
    public int outputSize() {
@@ -33,52 +33,52 @@ public class OaepEncoder {
          throw new IllegalArgumentException("input data too long");
       }
 
-      byte[] var4 = new byte[this.inputSize() + 1 + 2 * this.labelHash.length];
-      System.arraycopy(bytes, index, var4, var4.length - index2, index2);
-      var4[var4.length - index2 - 1] = 1;
-      System.arraycopy(this.labelHash, 0, var4, this.labelHash.length, this.labelHash.length);
-      byte[] var5 = new byte[this.labelHash.length];
-      this.random.nextBytes(var5);
-      byte[] var6 = this.maskGenerationFunction(var5, 0, var5.length, var4.length - this.labelHash.length);
+      byte[] encodingBuffer = new byte[this.inputSize() + 1 + 2 * this.labelHash.length];
+      System.arraycopy(bytes, index, encodingBuffer, encodingBuffer.length - index2, index2);
+      encodingBuffer[encodingBuffer.length - index2 - 1] = 1;
+      System.arraycopy(this.labelHash, 0, encodingBuffer, this.labelHash.length, this.labelHash.length);
+      byte[] encodingBuffer2 = new byte[this.labelHash.length];
+      this.random.nextBytes(encodingBuffer2);
+      byte[] mask = this.maskGenerationFunction(encodingBuffer2, 0, encodingBuffer2.length, encodingBuffer.length - this.labelHash.length);
 
-      for (int var7 = this.labelHash.length; var7 != var4.length; var7++) {
-         var4[var7] ^= var6[var7 - this.labelHash.length];
+      for (int labelHashCount = this.labelHash.length; labelHashCount != encodingBuffer.length; labelHashCount++) {
+         encodingBuffer[labelHashCount] ^= mask[labelHashCount - this.labelHash.length];
       }
 
-      System.arraycopy(var5, 0, var4, 0, this.labelHash.length);
-      byte[] var8 = this.maskGenerationFunction(var4, this.labelHash.length, var4.length - this.labelHash.length, this.labelHash.length);
+      System.arraycopy(encodingBuffer2, 0, encodingBuffer, 0, this.labelHash.length);
+      byte[] mask2 = this.maskGenerationFunction(encodingBuffer, this.labelHash.length, encodingBuffer.length - this.labelHash.length, this.labelHash.length);
 
-      for (int var9 = 0; var9 != this.labelHash.length; var9++) {
-         var4[var9] ^= var8[var9];
+      for (int index3 = 0; index3 != this.labelHash.length; index3++) {
+         encodingBuffer[index3] ^= mask2[index3];
       }
 
-      return this.engine.process(var4, var4.length);
+      return this.engine.process(encodingBuffer, encodingBuffer.length);
    }
 
    private byte[] maskGenerationFunction(byte[] bytes, int index, int index2, int index3) {
-      byte[] var5 = new byte[index3];
-      byte[] var6 = new byte[this.digest.getDigestSize()];
-      byte[] var7 = new byte[4];
-      int var8 = 0;
+      byte[] encodingBuffer = new byte[index3];
+      byte[] encodingBuffer2 = new byte[this.digest.getDigestSize()];
+      byte[] encodingBuffer3 = new byte[4];
+      int blockCounter = 0;
       this.digest.reset();
 
-      while (var8 < index3 / var6.length) {
-         Pack.intToBigEndian(var8, var7, 0);
+      while (blockCounter < index3 / encodingBuffer2.length) {
+         Pack.intToBigEndian(blockCounter, encodingBuffer3, 0);
          this.digest.update(bytes, index, index2);
-         this.digest.update(var7, 0, var7.length);
-         this.digest.doFinal(var6, 0);
-         System.arraycopy(var6, 0, var5, var8 * var6.length, var6.length);
-         var8++;
+         this.digest.update(encodingBuffer3, 0, encodingBuffer3.length);
+         this.digest.doFinal(encodingBuffer2, 0);
+         System.arraycopy(encodingBuffer2, 0, encodingBuffer, blockCounter * encodingBuffer2.length, encodingBuffer2.length);
+         blockCounter++;
       }
 
-      if (var8 * var6.length < index3) {
-         Pack.intToBigEndian(var8, var7, 0);
+      if (blockCounter * encodingBuffer2.length < index3) {
+         Pack.intToBigEndian(blockCounter, encodingBuffer3, 0);
          this.digest.update(bytes, index, index2);
-         this.digest.update(var7, 0, var7.length);
-         this.digest.doFinal(var6, 0);
-         System.arraycopy(var6, 0, var5, var8 * var6.length, var5.length - var8 * var6.length);
+         this.digest.update(encodingBuffer3, 0, encodingBuffer3.length);
+         this.digest.doFinal(encodingBuffer2, 0);
+         System.arraycopy(encodingBuffer2, 0, encodingBuffer, blockCounter * encodingBuffer2.length, encodingBuffer.length - blockCounter * encodingBuffer2.length);
       }
 
-      return var5;
+      return encodingBuffer;
    }
 }

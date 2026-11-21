@@ -14,36 +14,36 @@ public class InvokeTransformer extends OpcodeTransformer {
 
    @Override
    public String transform(CompilationContext context, AbstractInsnNode instruction, OperandStack stack, JumpEmitter jumps, String ownerName) {
-      MethodInsnNode var6 = (MethodInsnNode)instruction;
-      int var7 = var6.getOpcode();
-      Type[] var10 = Type.getArgumentTypes(var6.desc);
-      Type var11 = Type.getReturnType(var6.desc);
-      String[] var8 = new String[var10.length];
+      MethodInsnNode invocation = (MethodInsnNode)instruction;
+      int opcode = invocation.getOpcode();
+      Type[] argumentTypes = Type.getArgumentTypes(invocation.desc);
+      Type returnType = Type.getReturnType(invocation.desc);
+      String[] callArguments = new String[argumentTypes.length];
 
-      for (int var9 = 0; var9 < var8.length; var9++) {
-         var8[var9] = invocationVariable(stack.sizeBefore() - var8.length + var9, var10[var9]);
+      for (int index = 0; index < callArguments.length; index++) {
+         callArguments[index] = invocationVariable(stack.sizeBefore() - callArguments.length + index, argumentTypes[index]);
       }
 
-      String value12 = var7 == 184 ? null : invocationVariable(stack.sizeBefore() - var8.length - 1, Type.getType(Object.class));
-      String var14 = var11.getSort() == 0 ? "" : invocationVariable(stack.sizeAfter() - 1, var11) + " = ";
-      String var10000;
-      switch (var7) {
+      String receiver = opcode == 184 ? null : invocationVariable(stack.sizeBefore() - callArguments.length - 1, Type.getType(Object.class));
+      String emptyText = returnType.getSort() == 0 ? "" : invocationVariable(stack.sizeAfter() - 1, returnType) + " = ";
+      String virtualCall;
+      switch (opcode) {
          case 182:
          case 185:
-            var10000 = context.invokeVirtual(var6.owner, var6.name, var6.desc, value12, var8);
+            virtualCall = context.invokeVirtual(invocation.owner, invocation.name, invocation.desc, receiver, callArguments);
             break;
          case 183:
-            var10000 = context.invokeNonvirtual(var6.owner, var6.name, var6.desc, value12, var8);
+            virtualCall = context.invokeNonvirtual(invocation.owner, invocation.name, invocation.desc, receiver, callArguments);
             break;
          case 184:
-            var10000 = context.invokeStatic(var6.owner, var6.name, var6.desc, var8);
+            virtualCall = context.invokeStatic(invocation.owner, invocation.name, invocation.desc, callArguments);
             break;
          default:
             throw new AssertionError();
       }
 
-      String value13 = var10000;
-      return var14 + value13 + ";\n";
+      String virtualCall2 = virtualCall;
+      return emptyText + virtualCall2 + ";\n";
    }
 
    private static String invocationVariable(int index, Type type) {
@@ -51,33 +51,33 @@ public class InvokeTransformer extends OpcodeTransformer {
          throw new AssertionError();
       }
 
-      byte var10000;
+      byte byteValue;
       switch (type.getSort()) {
          case 1:
          case 2:
          case 3:
          case 4:
          case 5:
-            var10000 = 105;
+            byteValue = 105;
             break;
          case 6:
-            var10000 = 102;
+            byteValue = 102;
             break;
          case 7:
-            var10000 = 106;
+            byteValue = 106;
             break;
          case 8:
-            var10000 = 100;
+            byteValue = 100;
             break;
          case 9:
          case 10:
-            var10000 = 108;
+            byteValue = 108;
             break;
          default:
             throw new AssertionError();
       }
 
-      char var2 = (char)var10000;
-      return "stack" + index + "." + var2;
+      char byteValue2 = (char)byteValue;
+      return "stack" + index + "." + byteValue2;
    }
 }

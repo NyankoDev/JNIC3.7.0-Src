@@ -30,8 +30,8 @@ public class JniMember {
    public boolean equals(Object value) {
       if (this != value) {
          if (value instanceof JniMember) {
-            JniMember var2 = (JniMember)value;
-            if (this.isStatic == var2.isStatic && this.name.equals(var2.name) && this.descriptor.equals(var2.descriptor)) {
+            JniMember member = (JniMember)value;
+            if (this.isStatic == member.isStatic && this.name.equals(member.name) && this.descriptor.equals(member.descriptor)) {
                return true;
             }
          }
@@ -49,11 +49,11 @@ public class JniMember {
 
    @Override
    public String toString() {
-      StringBuilder var10000 = new StringBuilder();
+      StringBuilder builder = new StringBuilder();
       if (this.isStatic) {
-         var10000 = var10000.append("static ");
+         builder = builder.append("static ");
       }
 
-      return var10000.append(this.name).append(this.descriptor).toString();
+      return builder.append(this.name).append(this.descriptor).toString();
    }
 }

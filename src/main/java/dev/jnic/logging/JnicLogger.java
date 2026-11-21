@@ -180,6 +180,6 @@ public enum JnicLogger {
    }
 
    static {
-      JnicLogger[] var2 = new JnicLogger[]{INSTANCE};
+      JnicLogger[] jnicLoggers = new JnicLogger[]{INSTANCE};
    }
 }

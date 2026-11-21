@@ -20,84 +20,84 @@ public class SwitchTransformer extends OpcodeTransformer {
 
    @Override
    public String transform(CompilationContext context, AbstractInsnNode instruction, OperandStack stack, JumpEmitter jumps, String ownerName) {
-      LinkedHashMap<Integer, LabelNode> items8 = new LinkedHashMap();
-      LabelNode var7;
-      StringBuilder var15;
+      LinkedHashMap<Integer, LabelNode> entries = new LinkedHashMap();
+      LabelNode defaultTarget;
+      StringBuilder source;
       if (instruction.getOpcode() != 170) {
-         LookupSwitchInsnNode var13 = (LookupSwitchInsnNode)instruction;
-         List var6 = var13.keys;
+         LookupSwitchInsnNode lookupSwitch = (LookupSwitchInsnNode)instruction;
+         List caseKeys = lookupSwitch.keys;
 
-         for (int var9 = 0; var6.size() > var9; var6 = var13.keys) {
-            Integer var16 = var13.keys.get(var9);
-            LabelNode var19 = var13.labels.get(var9);
-            items8.put(var16, var19);
-            var9++;
+         for (int index = 0; caseKeys.size() > index; caseKeys = lookupSwitch.keys) {
+            Integer integer = lookupSwitch.keys.get(index);
+            LabelNode label = lookupSwitch.labels.get(index);
+            entries.put(integer, label);
+            index++;
          }
 
-         var7 = var13.dflt;
-         var15 = new StringBuilder();
-         var15.append("switch (");
-         int var11 = stack.sizeBefore();
-         Type var10 = Type.INT_TYPE;
-         String value12 = JniTypes.stackVariable("stack", var11 - 1, var10);
-         var15.append(value12);
-         String value33 = ")";
-         var15.append(value33);
-         var15.append(" {\n");
+         defaultTarget = lookupSwitch.dflt;
+         source = new StringBuilder();
+         source.append("switch (");
+         int stackSizeBefore = stack.sizeBefore();
+         Type intType = Type.INT_TYPE;
+         String stackValue = JniTypes.stackVariable("stack", stackSizeBefore - 1, intType);
+         source.append(stackValue);
+         String closingParenthesis = ")";
+         source.append(closingParenthesis);
+         source.append(" {\n");
 
-         for (Entry<Integer, LabelNode> items34 : items8.entrySet()) {
-            var15.append("    case ");
-            Object var27 = items34.getKey();
-            var15.append(var27);
-            var15.append(": ");
-            String var28 = new String("1");
-            LabelNode var35 = (LabelNode)items34.getValue();
-            String value36 = jumps.jumpIf(var28, var35);
-            var15.append(value36);
-            String value37 = "\n";
-            var15.append(value37);
+         for (Entry<Integer, LabelNode> entry : entries.entrySet()) {
+            source.append("    case ");
+            Object key = entry.getKey();
+            source.append(key);
+            source.append(": ");
+            String oneLiteral = new String("1");
+            LabelNode label2 = (LabelNode)entry.getValue();
+            String branchSource = jumps.jumpIf(oneLiteral, label2);
+            source.append(branchSource);
+            String newline = "\n";
+            source.append(newline);
          }
       } else {
-         TableSwitchInsnNode var14 = (TableSwitchInsnNode)instruction;
-         List var17 = var14.labels;
+         TableSwitchInsnNode tableSwitch = (TableSwitchInsnNode)instruction;
+         List caseLabels = tableSwitch.labels;
 
-         for (int var24 = 0; var17.size() > var24; var17 = var14.labels) {
-            Integer var18 = var14.min + var24;
-            LabelNode var20 = var14.labels.get(var24);
-            items8.put((Integer)var18, var20);
-            var24++;
+         for (int index2 = 0; caseLabels.size() > index2; caseLabels = tableSwitch.labels) {
+            Integer caseValue = tableSwitch.min + index2;
+            LabelNode label3 = tableSwitch.labels.get(index2);
+            entries.put((Integer)caseValue, label3);
+            index2++;
          }
 
-         var7 = var14.dflt;
-         var15 = new StringBuilder();
-         var15.append("switch (");
-         int var32 = stack.sizeBefore();
-         Type var29 = Type.INT_TYPE;
-         String value38 = JniTypes.stackVariable("stack", var32 - 1, var29);
-         var15.append(value38);
-         String value39 = ")";
-         var15.append(value39);
-         var15.append(" {\n");
+         defaultTarget = tableSwitch.dflt;
+         source = new StringBuilder();
+         source.append("switch (");
+         int stackSizeBefore2 = stack.sizeBefore();
+         Type intType2 = Type.INT_TYPE;
+         String stackValue2 = JniTypes.stackVariable("stack", stackSizeBefore2 - 1, intType2);
+         source.append(stackValue2);
+         String closingParenthesis2 = ")";
+         source.append(closingParenthesis2);
+         source.append(" {\n");
 
-         for (Entry<Integer, LabelNode> items40 : items8.entrySet()) {
-            var15.append("    case ");
-            Object var30 = items40.getKey();
-            var15.append(var30);
-            var15.append(": ");
-            String var31 = new String("1");
-            LabelNode var41 = (LabelNode)items40.getValue();
-            String value42 = jumps.jumpIf(var31, var41);
-            var15.append(value42);
-            String value43 = "\n";
-            var15.append(value43);
+         for (Entry<Integer, LabelNode> entry2 : entries.entrySet()) {
+            source.append("    case ");
+            Object key2 = entry2.getKey();
+            source.append(key2);
+            source.append(": ");
+            String oneLiteral2 = new String("1");
+            LabelNode label4 = (LabelNode)entry2.getValue();
+            String tableBranchSource = jumps.jumpIf(oneLiteral2, label4);
+            source.append(tableBranchSource);
+            String newline2 = "\n";
+            source.append(newline2);
          }
       }
 
-      var15.append("    default: ");
-      String var22 = new String("1");
-      String value26 = jumps.jumpIf(var22, var7);
-      var15.append(value26);
-      var15.append(";\n    }\n");
-      return var15.toString();
+      source.append("    default: ");
+      String oneLiteral3 = new String("1");
+      String defaultBranchSource = jumps.jumpIf(oneLiteral3, defaultTarget);
+      source.append(defaultBranchSource);
+      source.append(";\n    }\n");
+      return source.toString();
    }
 }

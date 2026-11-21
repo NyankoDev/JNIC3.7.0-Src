@@ -77,21 +77,21 @@ public final class Jnic {
    private static License license;
 
    private static String formatByteSize(long value) {
-      long var2 = value == Long.MIN_VALUE ? Long.MAX_VALUE : Math.abs(value);
-      if (var2 < 1024L) {
+      long absoluteSize = value == Long.MIN_VALUE ? Long.MAX_VALUE : Math.abs(value);
+      if (absoluteSize < 1024L) {
          return value + " B";
       }
 
-      long var4 = var2;
-      int var6 = 0;
+      long scaledSize = absoluteSize;
+      int unitIndex = 0;
 
-      for (byte var7 = 40; var7 >= 0 && var2 > 1152865209611504844L >> var7; var7 -= 10) {
-         var4 >>= 10;
-         var6++;
+      for (byte index = 40; index >= 0 && absoluteSize > 1152865209611504844L >> index; index -= 10) {
+         scaledSize >>= 10;
+         unitIndex++;
       }
 
-      long var8 = var4 * Long.signum(value);
-      return String.format("%.1f %ciB", var8 / 1024.0, "KMGTPE".charAt(var6));
+      long signedSize = scaledSize * Long.signum(value);
+      return String.format("%.1f %ciB", signedSize / 1024.0, "KMGTPE".charAt(unitIndex));
    }
 
    private static void printUsage() {
@@ -107,38 +107,38 @@ public final class Jnic {
       System.out.println(" ~ (c) +Vincent Tang 2020-2023\n\n");
    }
 
-   private static void compileNativeLibrary(Map<TargetPlatform, Path> map, Path path, List<String> list, Path path2, Path path3, TargetPlatform targetPlatform) {
-      Path var6 = ((Path)map.get(targetPlatform)).resolve("jnic.jnilib");
+   private static void compileNativeLibrary(Map<TargetPlatform, Path> targetDirectories, Path compiler, List<String> compilerOptions, Path includeDirectory, Path sourceFile, TargetPlatform target) {
+      Path libraryFile = ((Path)targetDirectories.get(target)).resolve("jnic.jnilib");
 
       try {
-         ArrayList var7 = new ArrayList<>(List.of(path.toString(), "cc", "-fno-sanitize=all", "-fno-sanitize-trap=all"));
-         var7.addAll(list);
+         ArrayList command = new ArrayList<>(List.of(compiler.toString(), "cc", "-fno-sanitize=all", "-fno-sanitize-trap=all"));
+         command.addAll(compilerOptions);
          if (JnicLogger.DEBUG_ENABLED) {
-            var7.add("-ftime-report");
+            command.add("-ftime-report");
          }
 
-         var7.addAll(
+         command.addAll(
             List.of(
                "-target",
-               targetPlatform.getTargetTriple(),
+               target.getTargetTriple(),
                "-std=c11",
                "-fPIC",
                "-shared",
                "-s",
                "-fvisibility=hidden",
-               "-I" + path2,
-               "-o" + var6,
-               path3.toString()
+               "-I" + includeDirectory,
+               "-o" + libraryFile,
+               sourceFile.toString()
             )
          );
-         int var8 = new ProcessBuilder(var7).redirectOutput(Redirect.INHERIT).redirectError(Redirect.INHERIT).start().waitFor();
-         if (var8 != 0) {
-            throw new IOException("Compiler failed with exit code " + var8);
+         int exitCode = new ProcessBuilder(command).redirectOutput(Redirect.INHERIT).redirectError(Redirect.INHERIT).start().waitFor();
+         if (exitCode != 0) {
+            throw new IOException("Compiler failed with exit code " + exitCode);
          }
 
-         debug(" -> " + targetPlatform);
-      } catch (IOException | InterruptedException | RuntimeException var10) {
-         failure("Failed to compile native library", var10);
+         debug(" -> " + target);
+      } catch (IOException | InterruptedException | RuntimeException failure) {
+         failure("Failed to compile native library", failure);
          System.exit(1);
       }
    }
@@ -149,39 +149,39 @@ public final class Jnic {
 
    private static Path findCompiler() {
       try {
-         Stream var10000 = Files.walk(Paths.get(Jnic.class.getProtectionDomain().getCodeSource().getLocation().toURI()).getParent(), 3);
-         Predicate<Path> function2 = path -> {
-            LinkOption[] var1x = new LinkOption[0];
-            return Files.isRegularFile(path, var1x);
+         Stream compilerCandidates = Files.walk(Paths.get(Jnic.class.getProtectionDomain().getCodeSource().getLocation().toURI()).getParent(), 3);
+         Predicate<Path> regularFiles = path -> {
+            LinkOption[] linkOptions = new LinkOption[0];
+            return Files.isRegularFile(path, linkOptions);
          };
-         var10000 = var10000.filter(function2);
-         Predicate<Path> function3 = Files::isExecutable;
-         var10000 = var10000.filter(function3);
-         Predicate<Path> function4 = path -> !path.endsWith("zig") ? path.endsWith("zig.exe") : true;
-         var10000 = var10000.filter(function4);
-         Predicate<Path> function5 = path -> {
+         compilerCandidates = compilerCandidates.filter(regularFiles);
+         Predicate<Path> executableFiles = Files::isExecutable;
+         compilerCandidates = compilerCandidates.filter(executableFiles);
+         Predicate<Path> compilerNames = path -> !path.endsWith("zig") ? path.endsWith("zig.exe") : true;
+         compilerCandidates = compilerCandidates.filter(compilerNames);
+         Predicate<Path> supportedCompilers = path -> {
             try {
-               Process var1x = Runtime.getRuntime().exec(new String[]{path.toString(), "version"});
+               Process compilerProcess = Runtime.getRuntime().exec(new String[]{path.toString(), "version"});
 
                try {
-                  Version var3x = Version.parse(new BufferedReader(new InputStreamReader(var1x.getInputStream())).readLine());
-                  if (MINIMUM_ZIG_VERSION.compareTo(var3x) > 0) {
-                     throw new RuntimeException(var3x + " older than minimum " + MINIMUM_ZIG_VERSION);
+                  Version compilerVersion = Version.parse(new BufferedReader(new InputStreamReader(compilerProcess.getInputStream())).readLine());
+                  if (MINIMUM_ZIG_VERSION.compareTo(compilerVersion) > 0) {
+                     throw new RuntimeException(compilerVersion + " older than minimum " + MINIMUM_ZIG_VERSION);
                   } else {
-                     return var1x.waitFor() == 0;
+                     return compilerProcess.waitFor() == 0;
                   }
-               } catch (RuntimeException var4x) {
-                  logCompilerWarning("Candidate " + path + ": " + var4x.getMessage());
+               } catch (RuntimeException versionFailure) {
+                  logCompilerWarning("Candidate " + path + ": " + versionFailure.getMessage());
                   return false;
                }
-            } catch (IOException | InterruptedException var5x) {
+            } catch (IOException | InterruptedException processFailure) {
                return false;
             }
          };
-         Optional var1 = var10000.filter(function5).findFirst();
-         if (var1.isPresent()) {
-            logCompilerWarning("Found compiler: " + var1.get());
-            return (Path)var1.get();
+         Optional compiler = compilerCandidates.filter(supportedCompilers).findFirst();
+         if (compiler.isPresent()) {
+            logCompilerWarning("Found compiler: " + compiler.get());
+            return (Path)compiler.get();
          } else {
             logCompilerWarning(new String(""));
             logCompilerWarning("Download the latest release of Zig for your platform");
@@ -190,8 +190,8 @@ public final class Jnic {
             logCompilerWarning(new String(""));
             return null;
          }
-      } catch (URISyntaxException | IOException var6) {
-         logCompilerSearchFailure("Error searching for compiler", var6);
+      } catch (URISyntaxException | IOException searchFailure) {
+         logCompilerSearchFailure("Error searching for compiler", searchFailure);
          return null;
       }
    }
@@ -200,12 +200,12 @@ public final class Jnic {
       JnicLogger.INSTANCE.error(text, throwable);
    }
 
-   public static void main(String[] values) throws Exception {
+   public static void main(String[] arguments) throws Exception {
       initializeTranslators();
       printBanner();
-      if (values.length > 0 && "activate".equals(values[0])) {
-         if (values.length == 2) {
-            License.activate(values[1]);
+      if (arguments.length > 0 && "activate".equals(arguments[0])) {
+         if (arguments.length == 2) {
+            License.activate(arguments[1]);
          } else {
             System.out.println("java -jar jnic.jar activate <licenceKey>");
          }
@@ -220,54 +220,54 @@ public final class Jnic {
                info("Expires: " + license.getExpiration());
             }
 
-            Path var1 = findCompiler();
-            if (var1 == null) {
+            Path path = findCompiler();
+            if (path == null) {
                error("No usable compiler found.");
                System.exit(1);
-            } else if (values.length < 3) {
+            } else if (arguments.length < 3) {
                printUsage();
             } else {
-               if (Arrays.asList(values).contains("-debug")) {
+               if (Arrays.asList(arguments).contains("-debug")) {
                   JnicLogger.INSTANCE.enableDebug();
                }
 
-               InputArchive var2;
+               InputArchive inputArchive;
                try {
-                  info("Reading input jar " + values[0]);
-                  var2 = new InputArchive(values[0]);
-               } catch (Exception var11) {
-                  failure("Failed to read input JAR file", var11);
+                  info("Reading input jar " + arguments[0]);
+                  inputArchive = new InputArchive(arguments[0]);
+               } catch (Exception failure) {
+                  failure("Failed to read input JAR file", failure);
                   printUsage();
                   System.exit(1);
                   return;
                }
 
-               JnicConfig var6;
+               JnicConfig jnicConfig;
                try {
-                  Persister var10000 = new Persister();
-                  info("Reading configuration file " + values[2]);
-                  var6 = var10000.read(JnicConfig.class, new File(values[2]));
-               } catch (Exception var10) {
-                  failure("Failed to read configuration file", var10);
+                  Persister persister = new Persister();
+                  info("Reading configuration file " + arguments[2]);
+                  jnicConfig = persister.read(JnicConfig.class, new File(arguments[2]));
+               } catch (Exception failure2) {
+                  failure("Failed to read configuration file", failure2);
                   printUsage();
                   System.exit(1);
                   return;
                }
 
-               if (var6.getTargets() != null && !var6.getTargets().isEmpty()) {
-                  TargetPlatform var7 = TargetPlatform.current();
-                  if (!var6.getTargets().contains(var7)) {
-                     warning("Current target " + var7 + " not requested.");
+               if (jnicConfig.getTargets() != null && !jnicConfig.getTargets().isEmpty()) {
+                  TargetPlatform random = TargetPlatform.current();
+                  if (!jnicConfig.getTargets().contains(random)) {
+                     warning("Current target " + random + " not requested.");
                      warning("The output file will not run on this system.");
                   }
 
                   info("Analysing classes...");
-                  CompilationPlan var8 = new CompilationPlan(var2, var6);
-                  Map var5 = var8.getMethods();
-                  Stream var12 = var5.values().stream();
-                  ToIntFunction<List> function9 = List::size;
-                  info("Translating " + var12.mapToInt(function9).sum() + " methods in " + var5.size() + " classes");
-                  compileApplication(values[1], var2, var6, var8, var1);
+                  CompilationPlan compilationPlan = new CompilationPlan(inputArchive, jnicConfig);
+                  Map methods = compilationPlan.getMethods();
+                  Stream stream = methods.values().stream();
+                  ToIntFunction<List> sizeMapper = List::size;
+                  info("Translating " + stream.mapToInt(sizeMapper).sum() + " methods in " + methods.size() + " classes");
+                  compileApplication(arguments[1], inputArchive, jnicConfig, compilationPlan, path);
                   info("Terminating normally.");
                } else {
                   error("No targets specified. At least one target is required.");
@@ -279,114 +279,114 @@ public final class Jnic {
       }
    }
 
-   private static void compileApplication(String text, InputArchive inputArchive, JnicConfig jnicConfig, CompilationPlan compilationPlan, Path path) throws Exception {
-      List<Path> items7 = new ArrayList();
-      EnumMap var5 = new EnumMap<>(TargetPlatform.class);
-      Path var8 = Files.createTempDirectory("jnic");
-      debug("Temporary files will be stored in " + var8);
-      copySupportFile(var8, "jni.h", items7);
-      if (jnicConfig.getOptions().isFlowObfuscationEnabled() || jnicConfig.getOptions().isStringObfuscationEnabled()) {
-         copySupportFile(var8, "crypto.h", items7);
+   private static void compileApplication(String outputFile, InputArchive inputArchive, JnicConfig config, CompilationPlan plan, Path compiler) throws Exception {
+      List<Path> temporaryFiles = new ArrayList();
+      EnumMap targetDirectories = new EnumMap<>(TargetPlatform.class);
+      Path temporaryDirectory = Files.createTempDirectory("jnic");
+      debug("Temporary files will be stored in " + temporaryDirectory);
+      copySupportFile(temporaryDirectory, "jni.h", temporaryFiles);
+      if (config.getOptions().isFlowObfuscationEnabled() || config.getOptions().isStringObfuscationEnabled()) {
+         copySupportFile(temporaryDirectory, "crypto.h", temporaryFiles);
       }
 
-      for (TargetPlatform var6 : jnicConfig.getTargets()) {
-         var5.put(var6, Files.createDirectory(var8.resolve(var6.toString())));
+      for (TargetPlatform target : config.getTargets()) {
+         targetDirectories.put(target, Files.createDirectory(temporaryDirectory.resolve(target.toString())));
       }
 
-      Map var16 = inputArchive.resourceEntries();
-      CompilationContext var13 = new CompilationContext(jnicConfig.getOptions());
-      String value10 = new NativeSourceGenerator(compilationPlan.getMethods(), var16.size() + inputArchive.getClasses().size() + 14).generate(var13);
+      Map resources = inputArchive.resourceEntries();
+      CompilationContext context = new CompilationContext(config.getOptions());
+      String generatedSource = new NativeSourceGenerator(plan.getMethods(), resources.size() + inputArchive.getClasses().size() + 14).generate(context);
       info("Saving translated sources");
-      Path var11 = var8.resolve("jnic.c");
-      items7.add(var11);
+      Path sourceFile = temporaryDirectory.resolve("jnic.c");
+      temporaryFiles.add(sourceFile);
 
-      try (BufferedWriter var17 = Files.newBufferedWriter(var11)) {
-         var17.write(value10);
+      try (BufferedWriter bufferedWriter = Files.newBufferedWriter(sourceFile)) {
+         bufferedWriter.write(generatedSource);
       }
 
-      List var18 = List.of(jnicConfig.getOptions().isFastCompileEnabled() ? "-Os" : "-O2", "-fno-optimize-sibling-calls");
+      List compilerOptions = List.of(config.getOptions().isFastCompileEnabled() ? "-Os" : "-O2", "-fno-optimize-sibling-calls");
       info("Compiling sources");
-      Stream var10000 = jnicConfig.getTargets().parallelStream();
-      Consumer<TargetPlatform> function19 = targetPlatform -> compileNativeLibrary(var5, path, var18, var8, var11, targetPlatform);
-      var10000.forEach(function19);
+      Stream targets = config.getTargets().parallelStream();
+      Consumer<TargetPlatform> compileTarget = targetPlatform -> compileNativeLibrary(targetDirectories, compiler, compilerOptions, temporaryDirectory, sourceFile, targetPlatform);
+      targets.forEach(compileTarget);
       if (!JnicLogger.TRACE_ENABLED) {
-         Iterator var15 = items7.iterator();
+         Iterator iterator = temporaryFiles.iterator();
 
-         while (var15.hasNext()) {
-            Files.delete((Path)var15.next());
+         while (iterator.hasNext()) {
+            Files.delete((Path)iterator.next());
          }
       }
 
       info("Finished compilation");
-      prepareOutput(text, inputArchive, jnicConfig, compilationPlan, var13, var5);
+      prepareOutput(outputFile, inputArchive, config, plan, context, targetDirectories);
    }
 
    private static void prepareOutput(
-      String text, InputArchive inputArchive, JnicConfig jnicConfig, CompilationPlan compilationPlan, CompilationContext context, Map<TargetPlatform, Path> map
+      String outputFile, InputArchive inputArchive, JnicConfig config, CompilationPlan plan, CompilationContext context, Map<TargetPlatform, Path> targetDirectories
    ) throws Exception {
-      LZMA2Options var6 = new LZMA2Options();
-      long var7 = 0L;
+      LZMA2Options compressionOptions = new LZMA2Options();
+      long totalLibrarySize = 0L;
 
-      for (Path var9 : map.values()) {
-         var7 += Files.size(var9.resolve("jnic.jnilib"));
+      for (Path libraryDirectory : targetDirectories.values()) {
+         totalLibrarySize += Files.size(libraryDirectory.resolve("jnic.jnilib"));
       }
 
-      int var19 = var7 > 67108864L ? 9 : (var7 > 33554432L ? 8 : (var7 > 16777216L ? 7 : 6));
-      var6.setPreset(var19);
-      info("Compressing native libraries (total size: " + formatByteSize(var7) + ") (preset: " + var19 + ")");
-      HashMap var22 = new HashMap();
-      ByteArrayOutputStream var23 = new ByteArrayOutputStream();
-      long var11 = 0L;
+      int compressionPreset = totalLibrarySize > 67108864L ? 9 : (totalLibrarySize > 33554432L ? 8 : (totalLibrarySize > 16777216L ? 7 : 6));
+      compressionOptions.setPreset(compressionPreset);
+      info("Compressing native libraries (total size: " + formatByteSize(totalLibrarySize) + ") (preset: " + compressionPreset + ")");
+      HashMap librarySlices = new HashMap();
+      ByteArrayOutputStream compressedLibraries = new ByteArrayOutputStream();
+      long libraryOffset = 0L;
 
-      try (FinishableOutputStream var13 = var6.getOutputStream(new FinishableWrapperOutputStream(var23))) {
-         for (Entry var15 : map.entrySet()) {
-            byte[] var16 = Files.readAllBytes(((Path)var15.getValue()).resolve("jnic.jnilib"));
-            var13.write(var16);
-            long var17 = var11 + var16.length;
-            TargetPlatform var10001 = (TargetPlatform)var15.getKey();
-            jnicConfig.getOptions();
-            var22.put(var10001, new NativeLibrarySlice(var11, var17));
-            var11 = var17;
+      try (FinishableOutputStream outputStream = compressionOptions.getOutputStream(new FinishableWrapperOutputStream(compressedLibraries))) {
+         for (Entry entry : targetDirectories.entrySet()) {
+            byte[] bytes = Files.readAllBytes(((Path)entry.getValue()).resolve("jnic.jnilib"));
+            outputStream.write(bytes);
+            long endOffset = libraryOffset + bytes.length;
+            TargetPlatform targetPlatform = (TargetPlatform)entry.getKey();
+            config.getOptions();
+            librarySlices.put(targetPlatform, new NativeLibrarySlice(libraryOffset, endOffset));
+            libraryOffset = endOffset;
          }
       }
 
-      String var24 = "dev/jnic/lib/" + UUID.randomUUID() + ".dat";
-      Map var26 = inputArchive.resourceEntries();
-      var26.put(var24, var23.toByteArray());
-      info("Compressed size: " + formatByteSize(var23.size()) + " (ratio: " + var23.size() / (float)var7 + ")");
+      String resourceName = "dev/jnic/lib/" + UUID.randomUUID() + ".dat";
+      Map resources = inputArchive.resourceEntries();
+      resources.put(resourceName, compressedLibraries.toByteArray());
+      info("Compressed size: " + formatByteSize(compressedLibraries.size()) + " (ratio: " + compressedLibraries.size() / (float)totalLibrarySize + ")");
       info("Preparing output JAR file");
-      String var32 = context.getRuntimePackage();
-      String var10002 = context.getLoaderClassName();
-      int var10003 = var6.getDictSize();
-      byte[] var10006 = context.getLiterals().getKeystream().getNonce();
+      String runtimePackage = context.getRuntimePackage();
+      String loaderClassName = context.getLoaderClassName();
+      int dictSize = compressionOptions.getDictSize();
+      byte[] nonce = context.getLiterals().getKeystream().getNonce();
       context.getOptions();
-      var26.putAll(RuntimeLoaderGenerator.generateClasses(var32, var10002, var10003, var22, var24, var10006));
-      ArrayList var28 = new ArrayList();
+      resources.putAll(RuntimeLoaderGenerator.generateClasses(runtimePackage, loaderClassName, dictSize, librarySlices, resourceName, nonce));
+      ArrayList outputClasses = new ArrayList();
 
-      for (ClassReader var20 : inputArchive.getClasses()) {
-         ClassNode var18 = new ClassNode();
-         ClassVisitor var21 = var18;
-         if (compilationPlan.getTranslatedMethods().containsClass(var20.getClassName())) {
-            var21 = new NativeMethodClassVisitor(new NativeInitializerVisitor(var18, context.getLoaderClassName()), compilationPlan.getTranslatedMethods());
+      for (ClassReader reader : inputArchive.getClasses()) {
+         ClassNode classNode = new ClassNode();
+         ClassVisitor visitor = classNode;
+         if (plan.getTranslatedMethods().containsClass(reader.getClassName())) {
+            visitor = new NativeMethodClassVisitor(new NativeInitializerVisitor(classNode, context.getLoaderClassName()), plan.getTranslatedMethods());
          }
 
-         var20.accept(var21, 0);
-         var28.add(var18);
+         reader.accept(visitor, 0);
+         outputClasses.add(classNode);
       }
 
-      OutputArchive var10000 = new OutputArchive(text);
-      jnicConfig.stripSelectionAnnotations(var28);
-      var10000.write(var28, var26);
+      OutputArchive outputArchive = new OutputArchive(outputFile);
+      config.stripSelectionAnnotations(outputClasses);
+      outputArchive.write(outputClasses, resources);
    }
 
-   private static void copySupportFile(Path path, String text, List<Path> list) throws IOException {
-      Path var3 = path.resolve(text);
+   private static void copySupportFile(Path directory, String resourceName, List<Path> temporaryFiles) throws IOException {
+      Path resolvedPath = directory.resolve(resourceName);
 
-      try (InputStream var4 = Objects.requireNonNull(Jnic.class.getResourceAsStream("/" + text))) {
-         Files.copy(var4, var3);
+      try (InputStream input = Objects.requireNonNull(Jnic.class.getResourceAsStream("/" + resourceName))) {
+         Files.copy(input, resolvedPath);
       }
 
-      list.add(var3);
+      temporaryFiles.add(resolvedPath);
    }
 
    private static void initializeTranslators() {

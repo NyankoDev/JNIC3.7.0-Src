@@ -42,17 +42,17 @@ public class InstructionGenerator implements SourceGenerator {
       this.jumps = jumps;
       this.ownerName = ownerName;
       if (enabled) {
-         for (InstructionTransformer var15 : INTRINSICS) {
-            if (var15.accepts(instruction)) {
-               this.transformer = var15;
+         for (InstructionTransformer instructionTransformer : INTRINSICS) {
+            if (instructionTransformer.accepts(instruction)) {
+               this.transformer = instructionTransformer;
                return;
             }
          }
       }
 
-      for (InstructionTransformer var17 : TRANSFORMERS) {
-         if (var17.accepts(instruction)) {
-            this.transformer = var17;
+      for (InstructionTransformer instructionTransformer2 : TRANSFORMERS) {
+         if (instructionTransformer2.accepts(instruction)) {
+            this.transformer = instructionTransformer2;
             return;
          }
       }
@@ -62,35 +62,35 @@ public class InstructionGenerator implements SourceGenerator {
 
    @Override
    public String generate(CompilationContext context) {
-      StringBuilder var2 = new StringBuilder();
+      StringBuilder source = new StringBuilder();
       if (!JnicLogger.TRACE_ENABLED) {
-         InstructionTransformer var20 = this.transformer;
-         AbstractInsnNode var4 = this.instruction;
-         Frame var5 = this.before;
-         Frame var6 = this.after;
-         NullnessFrame var7 = this.nullness;
-         OperandStack var14 = new OperandStack(var5, var6, var7);
-         JumpEmitter var11 = this.jumps;
-         String var17 = this.ownerName;
-         String value3 = var20.transform(context, var4, var14, var11, var17);
-         var2.append(value3);
-         return var2.toString();
+         InstructionTransformer transformer2 = this.transformer;
+         AbstractInsnNode instruction2 = this.instruction;
+         Frame before2 = this.before;
+         Frame after2 = this.after;
+         NullnessFrame nullness2 = this.nullness;
+         OperandStack stack = new OperandStack(before2, after2, nullness2);
+         JumpEmitter jumps2 = this.jumps;
+         String ownerName2 = this.ownerName;
+         String instructionSource = transformer2.transform(context, instruction2, stack, jumps2, ownerName2);
+         source.append(instructionSource);
+         return source.toString();
       } else {
-         var2.append("puts(\"[JNIC: exec ");
-         String value8 = SourceText.diagnosticText(BytecodeFormatter.format(this.instruction));
-         var2.append(value8);
-         var2.append("]\");\n    ");
-         InstructionTransformer var10000 = this.transformer;
-         AbstractInsnNode var10 = this.instruction;
-         Frame var12 = this.before;
-         Frame var15 = this.after;
-         NullnessFrame var18 = this.nullness;
-         OperandStack var13 = new OperandStack(var12, var15, var18);
-         JumpEmitter var16 = this.jumps;
-         String var19 = this.ownerName;
-         String value9 = var10000.transform(context, var10, var13, var16, var19);
-         var2.append(value9);
-         return var2.toString();
+         source.append("puts(\"[JNIC: exec ");
+         String diagnosticText = SourceText.diagnosticText(BytecodeFormatter.format(this.instruction));
+         source.append(diagnosticText);
+         source.append("]\");\n    ");
+         InstructionTransformer transformer3 = this.transformer;
+         AbstractInsnNode instruction3 = this.instruction;
+         Frame before3 = this.before;
+         Frame after3 = this.after;
+         NullnessFrame nullness3 = this.nullness;
+         OperandStack stack2 = new OperandStack(before3, after3, nullness3);
+         JumpEmitter jumps3 = this.jumps;
+         String ownerName3 = this.ownerName;
+         String instructionSource2 = transformer3.transform(context, instruction3, stack2, jumps3, ownerName3);
+         source.append(instructionSource2);
+         return source.toString();
       }
    }
 
@@ -109,11 +109,11 @@ public class InstructionGenerator implements SourceGenerator {
    }
 
    public boolean isReturn() {
-      InstructionTransformer var1 = this.transformer;
-      if (var1 == null) {
+      InstructionTransformer transformer2 = this.transformer;
+      if (transformer2 == null) {
          return false;
       } else {
-         return var1 == null ? true : var1 instanceof ReturnTransformer;
+         return transformer2 == null ? true : transformer2 instanceof ReturnTransformer;
       }
    }
 }

@@ -22,36 +22,36 @@ public class NativeInitializerVisitor extends ClassVisitor {
    }
 
    @Override
-   public MethodVisitor visitMethod(int index, String value2, String text, String text2, String[] values) {
-      if ("<clinit>".equals(value2)) {
-         value2 = "$jnicClinit";
+   public MethodVisitor visitMethod(int index, String literalText, String text, String text2, String[] values) {
+      if ("<clinit>".equals(literalText)) {
+         literalText = "$jnicClinit";
          this.hasInitializer = true;
          index += 4096;
       }
 
-      return this.cv.visitMethod(index, value2, text, text2, values);
+      return this.cv.visitMethod(index, literalText, text, text2, values);
    }
 
    @Override
    public void visitEnd() {
       super.visitMethod(4361, "$jnicLoader", "()V", null, null).visitEnd();
-      MethodVisitor var31 = super.visitMethod(9, "<clinit>", "()V", null, null);
-      var31.visitCode();
-      String var32 = this.loaderClassName;
-      var31.visitMethodInsn(184, var32, "init", "()V", false);
-      String var47 = this.className;
-      var31.visitMethodInsn(184, var47, "$jnicLoader", "()V", false);
+      MethodVisitor methodVisitor = super.visitMethod(9, "<clinit>", "()V", null, null);
+      methodVisitor.visitCode();
+      String loaderClassName2 = this.loaderClassName;
+      methodVisitor.visitMethodInsn(184, loaderClassName2, "init", "()V", false);
+      String className2 = this.className;
+      methodVisitor.visitMethodInsn(184, className2, "$jnicLoader", "()V", false);
       if (this.hasInitializer) {
-         String var63 = this.className;
-         var31.visitMethodInsn(184, var63, "$jnicClinit", "()V", false);
-         var31.visitInsn(177);
-         var31.visitMaxs(0, 0);
-         var31.visitEnd();
+         String className3 = this.className;
+         methodVisitor.visitMethodInsn(184, className3, "$jnicClinit", "()V", false);
+         methodVisitor.visitInsn(177);
+         methodVisitor.visitMaxs(0, 0);
+         methodVisitor.visitEnd();
          super.visitEnd();
       } else {
-         var31.visitInsn(177);
-         var31.visitMaxs(0, 0);
-         var31.visitEnd();
+         methodVisitor.visitInsn(177);
+         methodVisitor.visitMaxs(0, 0);
+         methodVisitor.visitEnd();
          super.visitEnd();
       }
    }

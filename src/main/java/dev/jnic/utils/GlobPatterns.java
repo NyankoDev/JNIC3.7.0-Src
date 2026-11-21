@@ -8,27 +8,27 @@ public class GlobPatterns {
          throw new NullPointerException("");
       }
 
-      int var1 = text.length();
-      StringBuilder var7 = new StringBuilder(var1 + var1);
-      char[] var2 = text.toCharArray();
-      int var3 = var2.length;
-      int var4 = 0;
+      int textLength = text.length();
+      StringBuilder builder = new StringBuilder(textLength + textLength);
+      char[] characters = text.toCharArray();
+      int characterCount = characters.length;
+      int index = 0;
 
-      while (var4 < var3) {
-         char var6 = var2[var4];
-         if ((var6 & '\uffff') << 16 >> 16 == 63) {
-            var7.append(".?");
-            var4++;
-         } else if ((var6 & '\uffff') != 42) {
-            String value8 = Pattern.quote(String.valueOf((char)(var6 & 65535)));
-            var7.append(value8);
-            var4++;
+      while (index < characterCount) {
+         char character = characters[index];
+         if ((character & '\uffff') << 16 >> 16 == 63) {
+            builder.append(".?");
+            index++;
+         } else if ((character & '\uffff') != 42) {
+            String quotedCharacter = Pattern.quote(String.valueOf((char)(character & 65535)));
+            builder.append(quotedCharacter);
+            index++;
          } else {
-            var7.append(".*");
-            var4++;
+            builder.append(".*");
+            index++;
          }
       }
 
-      return Pattern.compile(var7.toString());
+      return Pattern.compile(builder.toString());
    }
 }

@@ -15,7 +15,7 @@ public class UnsupportedSubroutineTransformer extends OpcodeTransformer {
 
    @Override
    public String transform(CompilationContext context, AbstractInsnNode instruction, OperandStack stack, JumpEmitter jumps, String ownerName) {
-      String var6 = UNSUPPORTED_MESSAGE;
-      throw new CompilationException(var6);
+      String unsupportedMessage = UNSUPPORTED_MESSAGE;
+      throw new CompilationException(unsupportedMessage);
    }
 }

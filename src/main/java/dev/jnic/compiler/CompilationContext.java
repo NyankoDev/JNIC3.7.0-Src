@@ -46,9 +46,9 @@ public class CompilationContext {
    }
 
    public void registerMethod(MethodReference methodReference) {
-      Map var10000 = this.functions;
-      String value4 = this.names.nextName();
-      var10000.put((MethodReference)methodReference, (String)value4);
+      Map functions2 = this.functions;
+      String functionName = this.names.nextName();
+      functions2.put((MethodReference)methodReference, (String)functionName);
    }
 
    public String nativeFunction(MethodReference methodReference) {
@@ -68,13 +68,13 @@ public class CompilationContext {
    }
 
    public static String jniTypeSuffix(Type type) {
-      int var1 = type.getSort();
-      if (Integer.compareUnsigned(var1, 10) > 0) {
-         String var20 = "No full name for " + type;
-         throw new IllegalArgumentException(var20);
+      int typeSort = type.getSort();
+      if (Integer.compareUnsigned(typeSort, 10) > 0) {
+         String expression = "No full name for " + type;
+         throw new IllegalArgumentException(expression);
       }
 
-      switch (var1) {
+      switch (typeSort) {
          case 0:
             return "Void";
          case 1:
@@ -103,89 +103,89 @@ public class CompilationContext {
    }
 
    public String invokeStatic(String owner, String name, String descriptor, String... arguments) {
-      String[] var6 = new String[arguments.length + 2];
-      String value8 = this.classCache.classReference(owner);
-      var6[0] = value8;
-      String value10 = this.classCache.methodId(owner, name, descriptor, true);
-      var6[1] = value10;
-      int var11 = arguments.length;
-      System.arraycopy((Object)arguments, 0, (Object)var6, 2, var11);
-      String value13 = jniTypeSuffix(Type.getReturnType(descriptor));
-      String var29 = "CallStatic" + value13 + "Method";
-      return this.jniCall(var29, var6);
+      String[] callArguments = new String[arguments.length + 2];
+      String classReference = this.classCache.classReference(owner);
+      callArguments[0] = classReference;
+      String methodId = this.classCache.methodId(owner, name, descriptor, true);
+      callArguments[1] = methodId;
+      int argumentCount = arguments.length;
+      System.arraycopy((Object)arguments, 0, (Object)callArguments, 2, argumentCount);
+      String typeSuffix = jniTypeSuffix(Type.getReturnType(descriptor));
+      String expression = "CallStatic" + typeSuffix + "Method";
+      return this.jniCall(expression, callArguments);
    }
 
    public String invokeNonvirtual(String owner, String name, String descriptor, String receiver, String... arguments) {
-      String[] var8 = new String[arguments.length + 3];
-      var8[0] = receiver;
-      String value15 = this.classCache.classReference(owner);
-      var8[1] = value15;
-      String value20 = this.classCache.methodId(owner, name, descriptor, false);
-      var8[2] = value20;
-      int var23 = arguments.length;
-      System.arraycopy((Object)arguments, 0, (Object)var8, 3, var23);
-      String value28 = jniTypeSuffix(Type.getReturnType(descriptor));
-      if (value28 == null) {
-         String var61 = "CallNonvirtual" + value28 + "Method";
-         return this.jniCall(var61, var8);
+      String[] callArguments = new String[arguments.length + 3];
+      callArguments[0] = receiver;
+      String classReference = this.classCache.classReference(owner);
+      callArguments[1] = classReference;
+      String methodId = this.classCache.methodId(owner, name, descriptor, false);
+      callArguments[2] = methodId;
+      int argumentCount = arguments.length;
+      System.arraycopy((Object)arguments, 0, (Object)callArguments, 3, argumentCount);
+      String typeSuffix = jniTypeSuffix(Type.getReturnType(descriptor));
+      if (typeSuffix == null) {
+         String expression = "CallNonvirtual" + typeSuffix + "Method";
+         return this.jniCall(expression, callArguments);
       } else {
-         String var62 = "CallNonvirtual" + value28 + "Method";
-         return this.jniCall(var62, var8);
+         String expression2 = "CallNonvirtual" + typeSuffix + "Method";
+         return this.jniCall(expression2, callArguments);
       }
    }
 
    public String invokeVirtual(String owner, String name, String descriptor, String receiver, String... arguments) {
-      String[] var7 = new String[arguments.length + 2];
-      var7[0] = receiver;
-      String value9 = this.classCache.methodId(owner, name, descriptor, false);
-      var7[1] = value9;
-      int var10 = arguments.length;
-      System.arraycopy((Object)arguments, 0, (Object)var7, 2, var10);
-      String value12 = jniTypeSuffix(Type.getReturnType(descriptor));
-      String var28 = "Call" + value12 + "Method";
-      return this.jniCall(var28, var7);
+      String[] callArguments = new String[arguments.length + 2];
+      callArguments[0] = receiver;
+      String methodId = this.classCache.methodId(owner, name, descriptor, false);
+      callArguments[1] = methodId;
+      int argumentCount = arguments.length;
+      System.arraycopy((Object)arguments, 0, (Object)callArguments, 2, argumentCount);
+      String typeSuffix = jniTypeSuffix(Type.getReturnType(descriptor));
+      String expression = "Call" + typeSuffix + "Method";
+      return this.jniCall(expression, callArguments);
    }
 
    public String readField(String owner, String name, String descriptor, String receiver) {
-      String value6 = jniTypeSuffix(Type.getType(descriptor));
-      String var22 = "Get" + value6 + "Field";
-      String[] var23 = new String[]{receiver, null};
-      String value25 = this.classCache.fieldId(owner, name, descriptor, false);
-      var23[1] = value25;
-      return this.jniCall(var22, var23);
+      String typeSuffix = jniTypeSuffix(Type.getType(descriptor));
+      String expression = "Get" + typeSuffix + "Field";
+      String[] callArguments = new String[]{receiver, null};
+      String fieldId = this.classCache.fieldId(owner, name, descriptor, false);
+      callArguments[1] = fieldId;
+      return this.jniCall(expression, callArguments);
    }
 
    public String writeField(String owner, String name, String descriptor, String receiver, String value) {
-      String value7 = jniTypeSuffix(Type.getType(descriptor));
-      String var23 = "Set" + value7 + "Field";
-      String[] var24 = new String[]{receiver, null, null};
-      String value26 = this.classCache.fieldId(owner, name, descriptor, false);
-      var24[1] = value26;
-      var24[2] = value;
-      return this.jniCall(var23, var24);
+      String typeSuffix = jniTypeSuffix(Type.getType(descriptor));
+      String expression = "Set" + typeSuffix + "Field";
+      String[] callArguments = new String[]{receiver, null, null};
+      String fieldId = this.classCache.fieldId(owner, name, descriptor, false);
+      callArguments[1] = fieldId;
+      callArguments[2] = value;
+      return this.jniCall(expression, callArguments);
    }
 
    public String readStaticField(String owner, String name, String descriptor) {
-      String value5 = jniTypeSuffix(Type.getType(descriptor));
-      String var21 = "GetStatic" + value5 + "Field";
-      String[] var22 = new String[2];
-      String value24 = this.classCache.classReference(owner);
-      var22[0] = value24;
-      String value26 = this.classCache.fieldId(owner, name, descriptor, true);
-      var22[1] = value26;
-      return this.jniCall(var21, var22);
+      String typeSuffix = jniTypeSuffix(Type.getType(descriptor));
+      String expression = "GetStatic" + typeSuffix + "Field";
+      String[] callArguments = new String[2];
+      String classReference = this.classCache.classReference(owner);
+      callArguments[0] = classReference;
+      String fieldId = this.classCache.fieldId(owner, name, descriptor, true);
+      callArguments[1] = fieldId;
+      return this.jniCall(expression, callArguments);
    }
 
    public String writeStaticField(String owner, String name, String descriptor, String value) {
-      String value6 = jniTypeSuffix(Type.getType(descriptor));
-      String var22 = "SetStatic" + value6 + "Field";
-      String[] var23 = new String[3];
-      String value25 = this.classCache.classReference(owner);
-      var23[0] = value25;
-      String value27 = this.classCache.fieldId(owner, name, descriptor, true);
-      var23[1] = value27;
-      var23[2] = value;
-      return this.jniCall(var22, var23);
+      String typeSuffix = jniTypeSuffix(Type.getType(descriptor));
+      String expression = "SetStatic" + typeSuffix + "Field";
+      String[] callArguments = new String[3];
+      String classReference = this.classCache.classReference(owner);
+      callArguments[0] = classReference;
+      String fieldId = this.classCache.fieldId(owner, name, descriptor, true);
+      callArguments[1] = fieldId;
+      callArguments[2] = value;
+      return this.jniCall(expression, callArguments);
    }
 
    public String constant(String owner, Object value) {
@@ -194,13 +194,13 @@ public class CompilationContext {
       }
 
       if (value instanceof String) {
-         String var3 = (String)value;
-         return this.jniCall("NewString", var3.isEmpty() ? "NULL" : this.literals.utf16String(var3), Integer.toString(var3.length()));
+         String stringValue = (String)value;
+         return this.jniCall("NewString", stringValue.isEmpty() ? "NULL" : this.literals.utf16String(stringValue), Integer.toString(stringValue.length()));
       }
 
       if (value instanceof Long) {
-         Long var6 = (Long)value;
-         return var6 + (var6 == Long.MIN_VALUE ? "ULL" : "LL");
+         Long longValue = (Long)value;
+         return longValue + (longValue == Long.MIN_VALUE ? "ULL" : "LL");
       }
 
       if (value instanceof Float || value instanceof Double) {
@@ -208,27 +208,27 @@ public class CompilationContext {
       }
 
       if (value instanceof Type) {
-         Type var7 = (Type)value;
-         if (var7.getSort() <= 8) {
-            return this.readStaticField(TypeBoxing.wrapperClass(var7), "TYPE", "Ljava/lang/Class;");
-         } else if (var7.getSort() == 9 || var7.getSort() == 10) {
-            return this.classCache.classReference(var7.getInternalName());
-         } else if (var7.getSort() == 11) {
-            String value4 = this.constant(owner, var7.getDescriptor());
-            String value5 = this.invokeVirtual("java/lang/Class", "getClassLoader", "()Ljava/lang/ClassLoader;", this.classCache.classReference(owner));
+         Type constantType = (Type)value;
+         if (constantType.getSort() <= 8) {
+            return this.readStaticField(TypeBoxing.wrapperClass(constantType), "TYPE", "Ljava/lang/Class;");
+         } else if (constantType.getSort() == 9 || constantType.getSort() == 10) {
+            return this.classCache.classReference(constantType.getInternalName());
+         } else if (constantType.getSort() == 11) {
+            String constantExpression = this.constant(owner, constantType.getDescriptor());
+            String virtualCall = this.invokeVirtual("java/lang/Class", "getClassLoader", "()Ljava/lang/ClassLoader;", this.classCache.classReference(owner));
             return this.invokeStatic(
                "java/lang/invoke/MethodType",
                "fromMethodDescriptorString",
                "(Ljava/lang/String;Ljava/lang/ClassLoader;)Ljava/lang/invoke/MethodType;",
-               value4,
-               value5
+               constantExpression,
+               virtualCall
             );
          } else {
-            throw new AssertionError("LDC of type " + var7);
+            throw new AssertionError("LDC of type " + constantType);
          }
       } else if (value instanceof Handle) {
-         Handle var8 = (Handle)value;
-         return this.handleLiteral(owner, var8);
+         Handle methodHandle = (Handle)value;
+         return this.handleLiteral(owner, methodHandle);
       } else {
          throw new IllegalArgumentException("LDC of unknown " + value);
       }
@@ -236,104 +236,104 @@ public class CompilationContext {
 
    public String jniCall(String name, String... arguments) {
       if (!allowsPending(name) && !name.equals("GetPrimitiveArrayCritical") && !name.equals("GetStringCritical")) {
-         String var3 = JniFunctionTypes.FUNCTION_TYPES.get(name);
-         if (var3 == null) {
+         String functionSignature = JniFunctionTypes.FUNCTION_TYPES.get(name);
+         if (functionSignature == null) {
             throw new IllegalArgumentException("Unknown JNI function: " + name);
          }
 
-         String value4 = var3.substring(0, var3.indexOf(" (JNICALL"));
-         boolean var5 = !value4.equals("void");
-         StringBuilder var6 = new StringBuilder("({ ");
-         if (var5) {
-            var6.append(value4).append(" jnic_result = 0; ");
+         String returnType = functionSignature.substring(0, functionSignature.indexOf(" (JNICALL"));
+         boolean hasReturnValue = !returnType.equals("void");
+         StringBuilder builder = new StringBuilder("({ ");
+         if (hasReturnValue) {
+            builder.append(returnType).append(" jnic_result = 0; ");
          }
 
-         var6.append("if (!(*env)->ExceptionCheck(env)) { ");
-         String[] var7 = new String[arguments.length];
+         builder.append("if (!(*env)->ExceptionCheck(env)) { ");
+         String[] callArguments = new String[arguments.length];
 
-         for (int var8 = 0; var8 < arguments.length; var8++) {
-            var7[var8] = "jnic_argument" + var8;
-            var6.append("__auto_type ").append(var7[var8]).append(" = (").append(arguments[var8]).append("); ");
+         for (int index = 0; index < arguments.length; index++) {
+            callArguments[index] = "jnic_argument" + index;
+            builder.append("__auto_type ").append(callArguments[index]).append(" = (").append(arguments[index]).append("); ");
          }
 
          if (requiresReceiver(name)) {
-            var6.append("if (!(*env)->ExceptionCheck(env) && jnic_argument0 == NULL) { ")
+            builder.append("if (!(*env)->ExceptionCheck(env) && jnic_argument0 == NULL) { ")
                .append("jclass jnic_exception = (*env)->FindClass(env, \"java/lang/NullPointerException\"); ")
                .append("if (jnic_exception != NULL) { (*env)->ThrowNew(env, jnic_exception, \"\"); (*env)->DeleteLocalRef(env, jnic_exception); } } ");
          }
 
-         var6.append("if (!(*env)->ExceptionCheck(env)) { ");
-         if (var5) {
-            var6.append("jnic_result = ");
+         builder.append("if (!(*env)->ExceptionCheck(env)) { ");
+         if (hasReturnValue) {
+            builder.append("jnic_result = ");
          }
 
-         var6.append(rawJniCall(name, var7)).append("; (*env)->ExceptionCheck(env); } } ");
-         return var6.append(var5 ? "jnic_result; })" : "(void)0; })").toString();
+         builder.append(rawJniCall(name, callArguments)).append("; (*env)->ExceptionCheck(env); } } ");
+         return builder.append(hasReturnValue ? "jnic_result; })" : "(void)0; })").toString();
       } else {
          return rawJniCall(name, arguments);
       }
    }
 
    private static String floatingLiteral(Number number) {
-      double var1 = number.doubleValue();
-      if (Double.isNaN(var1)) {
+      double numericValue = number.doubleValue();
+      if (Double.isNaN(numericValue)) {
          return "NAN";
-      } else if (var1 == Double.POSITIVE_INFINITY) {
+      } else if (numericValue == Double.POSITIVE_INFINITY) {
          return "INFINITY";
       } else {
-         return var1 == Double.NEGATIVE_INFINITY ? "-INFINITY" : number.toString() + (number instanceof Float ? "f" : "");
+         return numericValue == Double.NEGATIVE_INFINITY ? "-INFINITY" : number.toString() + (number instanceof Float ? "f" : "");
       }
    }
 
    private String handleLiteral(String text, Handle handle) {
-      int var3 = handle.getTag();
-      if (var3 >= 1 && var3 <= 9) {
-         Type var4 = Type.getObjectType(handle.getOwner());
-         String value5 = this.classCache.methodHandleLookup(text);
-         String value6 = this.constant(text, var4);
-         if (var3 == 8) {
+      int tag = handle.getTag();
+      if (tag >= 1 && tag <= 9) {
+         Type objectType = Type.getObjectType(handle.getOwner());
+         String lookup = this.classCache.methodHandleLookup(text);
+         String constantExpression = this.constant(text, objectType);
+         if (tag == 8) {
             return this.invokeVirtual(
                "java/lang/invoke/MethodHandles$Lookup",
                "findConstructor",
                "(Ljava/lang/Class;Ljava/lang/invoke/MethodType;)Ljava/lang/invoke/MethodHandle;",
-               value5,
-               value6,
+               lookup,
+               constantExpression,
                this.constant(text, Type.getType(handle.getDesc()))
             );
          } else {
-            String value7 = this.constant(text, handle.getName());
-            String value8 = this.constant(text, Type.getType(handle.getDesc()));
-            if (var3 <= 4) {
-               String var9 = "find" + (var3 != 2 && var3 != 4 ? "" : "Static") + (var3 != 3 && var3 != 4 ? "Getter" : "Setter");
+            String constantExpression2 = this.constant(text, handle.getName());
+            String constantExpression3 = this.constant(text, Type.getType(handle.getDesc()));
+            if (tag <= 4) {
+               String expression = "find" + (tag != 2 && tag != 4 ? "" : "Static") + (tag != 3 && tag != 4 ? "Getter" : "Setter");
                return this.invokeVirtual(
                   "java/lang/invoke/MethodHandles$Lookup",
-                  var9,
+                  expression,
                   "(Ljava/lang/Class;Ljava/lang/String;Ljava/lang/Class;)Ljava/lang/invoke/MethodHandle;",
-                  value5,
-                  value6,
-                  value7,
-                  value8
+                  lookup,
+                  constantExpression,
+                  constantExpression2,
+                  constantExpression3
                );
             } else {
-               return var3 == 7
+               return tag == 7
                   ? this.invokeVirtual(
                      "java/lang/invoke/MethodHandles$Lookup",
                      "findSpecial",
                      "(Ljava/lang/Class;Ljava/lang/String;Ljava/lang/invoke/MethodType;Ljava/lang/Class;)Ljava/lang/invoke/MethodHandle;",
-                     value5,
-                     value6,
-                     value7,
-                     value8,
-                     this.constant(text, var4)
+                     lookup,
+                     constantExpression,
+                     constantExpression2,
+                     constantExpression3,
+                     this.constant(text, objectType)
                   )
                   : this.invokeVirtual(
                      "java/lang/invoke/MethodHandles$Lookup",
-                     var3 == 6 ? "findStatic" : "findVirtual",
+                     tag == 6 ? "findStatic" : "findVirtual",
                      "(Ljava/lang/Class;Ljava/lang/String;Ljava/lang/invoke/MethodType;)Ljava/lang/invoke/MethodHandle;",
-                     value5,
-                     value6,
-                     value7,
-                     value8
+                     lookup,
+                     constantExpression,
+                     constantExpression2,
+                     constantExpression3
                   );
             }
          }
@@ -343,16 +343,16 @@ public class CompilationContext {
    }
 
    private static String rawJniCall(String text, String[] values) {
-      StringBuilder var2 = new StringBuilder("(*env)->").append(text).append("(env");
-      String[] var3 = values;
-      int var4 = values.length;
+      StringBuilder builder = new StringBuilder("(*env)->").append(text).append("(env");
+      String[] values2 = values;
+      int valueCount = values.length;
 
-      for (int var5 = 0; var5 < var4; var5++) {
-         String var6 = var3[var5];
-         var2.append(", ").append(var6);
+      for (int index = 0; index < valueCount; index++) {
+         String argument = values2[index];
+         builder.append(", ").append(argument);
       }
 
-      return var2.append(')').toString();
+      return builder.append(')').toString();
    }
 
    private static boolean allowsPending(String text) {

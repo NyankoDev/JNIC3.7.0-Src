@@ -14,33 +14,33 @@ public class ThrowTransformer extends OpcodeTransformer {
 
    @Override
    public String transform(CompilationContext context, AbstractInsnNode instruction, OperandStack stack, JumpEmitter jumps, String ownerName) {
-      StringBuilder var7 = new StringBuilder();
-      int var8 = stack.sizeBefore();
-      int var16 = stack.sizeBefore();
-      Type var17 = JniTypes.OBJECT_TYPE;
-      String value18 = JniTypes.stackVariable("stack", var16 - 1, var17);
-      if (stack.mayBeNull(var8 - 1)) {
-         var7.append("if (");
-         var7.append(value18);
-         var7.append(" == NULL) ");
-         String[] var44 = new String[2];
-         String value53 = context.getClassCache().classReference("java/lang/NullPointerException");
-         var44[0] = value53;
-         var44[1] = "\"\"";
-         String var61 = "(void)(" + context.jniCall("ThrowNew", var44) + ")";
-         var7.append(var61);
-         var7.append(";\n    else ");
-         String[] var86 = new String[]{value18};
-         String var87 = "(void)(" + context.jniCall("Throw", var86) + ")";
-         var7.append(var87);
-         var7.append(";\n");
-         return var7.toString();
+      StringBuilder source = new StringBuilder();
+      int stackSizeBefore = stack.sizeBefore();
+      int stackSizeBefore2 = stack.sizeBefore();
+      Type objectType = JniTypes.OBJECT_TYPE;
+      String stackValue = JniTypes.stackVariable("stack", stackSizeBefore2 - 1, objectType);
+      if (stack.mayBeNull(stackSizeBefore - 1)) {
+         source.append("if (");
+         source.append(stackValue);
+         source.append(" == NULL) ");
+         String[] callArguments = new String[2];
+         String classReference = context.getClassCache().classReference("java/lang/NullPointerException");
+         callArguments[0] = classReference;
+         callArguments[1] = "\"\"";
+         String expression = "(void)(" + context.jniCall("ThrowNew", callArguments) + ")";
+         source.append(expression);
+         source.append(";\n    else ");
+         String[] callArguments2 = new String[]{stackValue};
+         String expression2 = "(void)(" + context.jniCall("Throw", callArguments2) + ")";
+         source.append(expression2);
+         source.append(";\n");
+         return source.toString();
       } else {
-         String[] var27 = new String[]{value18};
-         String var28 = "(void)(" + context.jniCall("Throw", var27) + ")";
-         var7.append(var28);
-         var7.append(";\n");
-         return var7.toString();
+         String[] callArguments3 = new String[]{stackValue};
+         String expression3 = "(void)(" + context.jniCall("Throw", callArguments3) + ")";
+         source.append(expression3);
+         source.append(";\n");
+         return source.toString();
       }
    }
 }

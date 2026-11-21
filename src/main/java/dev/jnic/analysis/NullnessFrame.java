@@ -21,8 +21,8 @@ public class NullnessFrame extends AliasFrame<NullnessValue> {
    }
 
    private void refineAliases(AliasSet aliasSet, NullnessValue nullnessValue) {
-      for (int var4 = aliasSet.nextSetBit(0); var4 >= 0; var4 = aliasSet.nextSetBit(var4 + 1)) {
-         this.setSlot(var4, nullnessValue);
+      for (int slotIndex = aliasSet.nextSetBit(0); slotIndex >= 0; slotIndex = aliasSet.nextSetBit(slotIndex + 1)) {
+         this.setSlot(slotIndex, nullnessValue);
       }
    }
 
@@ -31,50 +31,50 @@ public class NullnessFrame extends AliasFrame<NullnessValue> {
       if (labelNode == null) {
          if (index != 198) {
             if (index == 199) {
-               AliasSet var4 = this.branchAliases;
-               NullnessValue var5 = NullnessValue.NULL;
-               this.refineAliases(var4, var5);
+               AliasSet branchAliases2 = this.branchAliases;
+               NullnessValue nullValue = NullnessValue.NULL;
+               this.refineAliases(branchAliases2, nullValue);
             }
          } else {
-            AliasSet var6 = this.branchAliases;
-            NullnessValue var9 = NullnessValue.NOT_NULL;
-            this.refineAliases(var6, var9);
+            AliasSet branchAliases3 = this.branchAliases;
+            NullnessValue nonNullValue = NullnessValue.NOT_NULL;
+            this.refineAliases(branchAliases3, nonNullValue);
          }
       } else if (index != 198) {
          if (index == 199) {
-            AliasSet var7 = this.branchAliases;
-            NullnessValue var10 = NullnessValue.NOT_NULL;
-            this.refineAliases(var7, var10);
+            AliasSet branchAliases4 = this.branchAliases;
+            NullnessValue nonNullValue2 = NullnessValue.NOT_NULL;
+            this.refineAliases(branchAliases4, nonNullValue2);
          }
       } else {
-         AliasSet var8 = this.branchAliases;
-         NullnessValue var11 = NullnessValue.NULL;
-         this.refineAliases(var8, var11);
+         AliasSet branchAliases5 = this.branchAliases;
+         NullnessValue nullValue2 = NullnessValue.NULL;
+         this.refineAliases(branchAliases5, nullValue2);
       }
    }
 
    @Override
    public void execute(AbstractInsnNode instruction, Interpreter interpreter) throws AnalyzerException {
       label146: {
-         AliasSet var12;
+         AliasSet aliasGroup;
          label116: {
-            int var3;
+            int topSlot;
             label115: {
                label114: {
                   label121: {
-                     var3 = this.topSlot();
-                     int var7;
+                     topSlot = this.topSlot();
+                     int opcode;
                      if (instruction.getOpcode() != 198) {
                         if (instruction.getOpcode() == 199) {
-                           AliasSet var5;
+                           AliasSet aliasGroup2;
                            label86: {
-                              AliasSet var13 = this.aliasSet(var3);
-                              this.branchAliases = var13;
-                              int var9 = instruction.getOpcode();
-                              if (Integer.compareUnsigned(var9 - 180, 15) <= 0) {
-                                 switch (var9 - 180) {
+                              AliasSet aliasGroup3 = this.aliasSet(topSlot);
+                              this.branchAliases = aliasGroup3;
+                              int opcode2 = instruction.getOpcode();
+                              if (Integer.compareUnsigned(opcode2 - 180, 15) <= 0) {
+                                 switch (opcode2 - 180) {
                                     case 0:
-                                       var5 = this.aliasSet(var3);
+                                       aliasGroup2 = this.aliasSet(topSlot);
                                        break label86;
                                     case 1:
                                        break;
@@ -82,8 +82,8 @@ public class NullnessFrame extends AliasFrame<NullnessValue> {
                                     case 3:
                                     case 5:
                                        instruction = (MethodInsnNode)instruction;
-                                       int var4 = Type.getArgumentTypes(((MethodInsnNode)instruction).desc).length;
-                                       var5 = this.aliasSet(var3 - var4);
+                                       int argumentTypeCount = Type.getArgumentTypes(((MethodInsnNode)instruction).desc).length;
+                                       aliasGroup2 = this.aliasSet(topSlot - argumentTypeCount);
                                        break label86;
                                     case 4:
                                     case 6:
@@ -97,18 +97,18 @@ public class NullnessFrame extends AliasFrame<NullnessValue> {
                                     case 10:
                                     case 14:
                                     case 15:
-                                       var5 = this.aliasSet(var3);
+                                       aliasGroup2 = this.aliasSet(topSlot);
                                        break label86;
                                     default:
                                        throw new AssertionError();
                                  }
                               } else {
-                                 if (Integer.compareUnsigned(var9 + -46, 7) > 0) {
-                                    if (Integer.compareUnsigned(var9 + -79, 7) > 0) {
+                                 if (Integer.compareUnsigned(opcode2 + -46, 7) > 0) {
+                                    if (Integer.compareUnsigned(opcode2 + -79, 7) > 0) {
                                        break label146;
                                     }
 
-                                    switch (var9 + -79) {
+                                    switch (opcode2 + -79) {
                                        case 0:
                                        case 1:
                                        case 2:
@@ -117,14 +117,14 @@ public class NullnessFrame extends AliasFrame<NullnessValue> {
                                        case 5:
                                        case 6:
                                        case 7:
-                                          var5 = this.aliasSet(var3 - 2);
+                                          aliasGroup2 = this.aliasSet(topSlot - 2);
                                           break label86;
                                        default:
                                           throw new AssertionError();
                                     }
                                  }
 
-                                 switch (var9 + -46) {
+                                 switch (opcode2 + -46) {
                                     case 0:
                                     case 1:
                                     case 2:
@@ -139,22 +139,22 @@ public class NullnessFrame extends AliasFrame<NullnessValue> {
                                  }
                               }
 
-                              var5 = this.aliasSet(var3 - 1);
+                              aliasGroup2 = this.aliasSet(topSlot - 1);
                            }
 
                            super.execute(instruction, interpreter);
-                           if (var5 != null) {
-                              NullnessValue var6 = NullnessValue.NOT_NULL;
-                              this.refineAliases(var5, var6);
+                           if (aliasGroup2 != null) {
+                              NullnessValue nonNullValue = NullnessValue.NOT_NULL;
+                              this.refineAliases(aliasGroup2, nonNullValue);
                            }
 
                            return;
                         }
 
                         this.branchAliases = null;
-                        var7 = instruction.getOpcode();
-                        if (Integer.compareUnsigned(var7 - 180, 15) <= 0) {
-                           switch (var7 - 180) {
+                        opcode = instruction.getOpcode();
+                        if (Integer.compareUnsigned(opcode - 180, 15) <= 0) {
+                           switch (opcode - 180) {
                               case 0:
                                  break label115;
                               case 1:
@@ -163,8 +163,8 @@ public class NullnessFrame extends AliasFrame<NullnessValue> {
                               case 3:
                               case 5:
                                  instruction = (MethodInsnNode)instruction;
-                                 int var8 = Type.getArgumentTypes(((MethodInsnNode)instruction).desc).length;
-                                 var12 = this.aliasSet(var3 - var8);
+                                 int argumentTypeCount2 = Type.getArgumentTypes(((MethodInsnNode)instruction).desc).length;
+                                 aliasGroup = this.aliasSet(topSlot - argumentTypeCount2);
                                  break label116;
                               case 4:
                               case 6:
@@ -184,8 +184,8 @@ public class NullnessFrame extends AliasFrame<NullnessValue> {
                            }
                         }
 
-                        if (Integer.compareUnsigned(var7 + -46, 7) <= 0) {
-                           switch (var7 + -46) {
+                        if (Integer.compareUnsigned(opcode + -46, 7) <= 0) {
+                           switch (opcode + -46) {
                               case 0:
                               case 1:
                               case 2:
@@ -200,11 +200,11 @@ public class NullnessFrame extends AliasFrame<NullnessValue> {
                            }
                         }
                      } else {
-                        AliasSet var14 = this.aliasSet(var3);
-                        this.branchAliases = var14;
-                        var7 = instruction.getOpcode();
-                        if (Integer.compareUnsigned(var7 - 180, 15) <= 0) {
-                           switch (var7 - 180) {
+                        AliasSet aliasGroup4 = this.aliasSet(topSlot);
+                        this.branchAliases = aliasGroup4;
+                        opcode = instruction.getOpcode();
+                        if (Integer.compareUnsigned(opcode - 180, 15) <= 0) {
+                           switch (opcode - 180) {
                               case 0:
                                  break label115;
                               case 1:
@@ -213,8 +213,8 @@ public class NullnessFrame extends AliasFrame<NullnessValue> {
                               case 3:
                               case 5:
                                  instruction = (MethodInsnNode)instruction;
-                                 int var10 = Type.getArgumentTypes(((MethodInsnNode)instruction).desc).length;
-                                 var12 = this.aliasSet(var3 - var10);
+                                 int argumentTypeCount3 = Type.getArgumentTypes(((MethodInsnNode)instruction).desc).length;
+                                 aliasGroup = this.aliasSet(topSlot - argumentTypeCount3);
                                  break label116;
                               case 4:
                               case 6:
@@ -234,8 +234,8 @@ public class NullnessFrame extends AliasFrame<NullnessValue> {
                            }
                         }
 
-                        if (Integer.compareUnsigned(var7 + -46, 7) <= 0) {
-                           switch (var7 + -46) {
+                        if (Integer.compareUnsigned(opcode + -46, 7) <= 0) {
+                           switch (opcode + -46) {
                               case 0:
                               case 1:
                               case 2:
@@ -244,7 +244,7 @@ public class NullnessFrame extends AliasFrame<NullnessValue> {
                               case 5:
                               case 6:
                               case 7:
-                                 var12 = this.aliasSet(var3 - 1);
+                                 aliasGroup = this.aliasSet(topSlot - 1);
                                  break label116;
                               default:
                                  throw new AssertionError();
@@ -252,11 +252,11 @@ public class NullnessFrame extends AliasFrame<NullnessValue> {
                         }
                      }
 
-                     if (Integer.compareUnsigned(var7 + -79, 7) > 0) {
+                     if (Integer.compareUnsigned(opcode + -79, 7) > 0) {
                         break label146;
                      }
 
-                     switch (var7 + -79) {
+                     switch (opcode + -79) {
                         case 0:
                         case 1:
                         case 2:
@@ -265,28 +265,28 @@ public class NullnessFrame extends AliasFrame<NullnessValue> {
                         case 5:
                         case 6:
                         case 7:
-                           var12 = this.aliasSet(var3 - 2);
+                           aliasGroup = this.aliasSet(topSlot - 2);
                            break label116;
                         default:
                            throw new AssertionError();
                      }
                   }
 
-                  var12 = this.aliasSet(var3);
+                  aliasGroup = this.aliasSet(topSlot);
                   break label116;
                }
 
-               var12 = this.aliasSet(var3 - 1);
+               aliasGroup = this.aliasSet(topSlot - 1);
                break label116;
             }
 
-            var12 = this.aliasSet(var3);
+            aliasGroup = this.aliasSet(topSlot);
          }
 
          super.execute(instruction, interpreter);
-         if (var12 != null) {
-            NullnessValue var11 = NullnessValue.NOT_NULL;
-            this.refineAliases(var12, var11);
+         if (aliasGroup != null) {
+            NullnessValue nonNullValue2 = NullnessValue.NOT_NULL;
+            this.refineAliases(aliasGroup, nonNullValue2);
          }
 
          return;

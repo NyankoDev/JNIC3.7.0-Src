@@ -21,8 +21,8 @@ class JniClassCache {
    }
 
    String nextMemberName(JniMember jniMember) {
-      int var2 = this.nextMemberId++;
-      return "id_" + var2;
+      int previousNextMemberId = this.nextMemberId++;
+      return "id_" + previousNextMemberId;
    }
 
    String classReference() {
@@ -31,8 +31,8 @@ class JniClassCache {
 
    String fieldReference(JniMember jniMember) {
       if (!this.fields.containsKey(jniMember)) {
-         String var2 = "field: " + jniMember;
-         throw new IllegalStateException(var2);
+         String expression = "field: " + jniMember;
+         throw new IllegalStateException(expression);
       } else {
          return this.functionName + this.fields.get(jniMember) + "(env)";
       }
@@ -40,8 +40,8 @@ class JniClassCache {
 
    String methodReference(JniMember jniMember) {
       if (!this.methods.containsKey(jniMember)) {
-         String var25 = "method: " + jniMember;
-         throw new IllegalStateException(var25);
+         String expression = "method: " + jniMember;
+         throw new IllegalStateException(expression);
       } else {
          return this.functionName + this.methods.get(jniMember) + "(env)";
       }
@@ -52,7 +52,7 @@ class JniClassCache {
          throw new IllegalStateException("lookup");
       }
 
-      String var5 = this.functionName;
-      return "*" + var5 + "l()";
+      String functionName2 = this.functionName;
+      return "*" + functionName2 + "l()";
    }
 }

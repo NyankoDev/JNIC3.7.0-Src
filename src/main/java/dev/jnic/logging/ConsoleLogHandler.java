@@ -16,12 +16,12 @@ class ConsoleLogHandler {
    }
 
    void log(int index, String text, String text2, Throwable throwable) {
-      StringBuilder var5;
+      StringBuilder builder;
       label43: {
          JnicLogger.getState();
-         var5 = new StringBuilder(256);
-         String value6 = this.timestampFormat.format(new Date());
-         var5.append(value6);
+         builder = new StringBuilder(256);
+         String timestamp = this.timestampFormat.format(new Date());
+         builder.append(timestamp);
          if (Integer.compareUnsigned(index - 1, 4) > 0) {
             if (text == null) {
                break label43;
@@ -29,31 +29,31 @@ class ConsoleLogHandler {
          } else {
             switch (index - 1) {
                case 0:
-                  var5.append(" TRACE: ");
+                  builder.append(" TRACE: ");
                   if (text == null) {
                      break label43;
                   }
                   break;
                case 1:
-                  var5.append(" DEBUG: ");
+                  builder.append(" DEBUG: ");
                   if (text == null) {
                      break label43;
                   }
                   break;
                case 2:
-                  var5.append("  INFO: ");
+                  builder.append("  INFO: ");
                   if (text == null) {
                      break label43;
                   }
                   break;
                case 3:
-                  var5.append("  WARN: ");
+                  builder.append("  WARN: ");
                   if (text == null) {
                      break label43;
                   }
                   break;
                case 4:
-                  var5.append(" ERROR: ");
+                  builder.append(" ERROR: ");
                   if (text == null) {
                      break label43;
                   }
@@ -63,40 +63,40 @@ class ConsoleLogHandler {
             }
          }
 
-         var5.append('[');
-         var5.append(text);
-         var5.append("] ");
-         var5.append(text2);
+         builder.append('[');
+         builder.append(text);
+         builder.append("] ");
+         builder.append(text2);
          if (throwable == null) {
-            String value14 = var5.toString();
-            this.printLine(value14);
+            String generatedSource = builder.toString();
+            this.printLine(generatedSource);
             return;
          }
 
-         StringWriter var15 = new StringWriter(256);
-         PrintWriter var11 = new PrintWriter(var15);
-         throwable.printStackTrace(var11);
-         var5.append('\n');
-         String value16 = var15.toString().trim();
-         var5.append(value16);
-         String value8 = var5.toString();
-         this.printLine(value8);
+         StringWriter stringWriter = new StringWriter(256);
+         PrintWriter printWriter = new PrintWriter(stringWriter);
+         throwable.printStackTrace(printWriter);
+         builder.append('\n');
+         String stackTraceText = stringWriter.toString().trim();
+         builder.append(stackTraceText);
+         String generatedSource2 = builder.toString();
+         this.printLine(generatedSource2);
          return;
       }
 
-      var5.append(text2);
+      builder.append(text2);
       if (throwable == null) {
-         String value9 = var5.toString();
-         this.printLine(value9);
+         String generatedSource3 = builder.toString();
+         this.printLine(generatedSource3);
       } else {
-         StringWriter var10 = new StringWriter(256);
-         PrintWriter var7 = new PrintWriter(var10);
-         throwable.printStackTrace(var7);
-         var5.append('\n');
-         String value12 = var10.toString().trim();
-         var5.append(value12);
-         String value13 = var5.toString();
-         this.printLine(value13);
+         StringWriter stringWriter2 = new StringWriter(256);
+         PrintWriter printWriter2 = new PrintWriter(stringWriter2);
+         throwable.printStackTrace(printWriter2);
+         builder.append('\n');
+         String stackTraceText2 = stringWriter2.toString().trim();
+         builder.append(stackTraceText2);
+         String generatedSource4 = builder.toString();
+         this.printLine(generatedSource4);
       }
    }
 

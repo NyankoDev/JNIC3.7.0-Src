@@ -57,75 +57,75 @@ public class License {
    }
 
    public String licenseType() {
-      String var10000;
+      String literalText;
       switch (this.edition) {
          case "DEV":
-            var10000 = "Dev";
+            literalText = "Dev";
             break;
          case "1":
-            var10000 = "standard";
+            literalText = "standard";
             break;
          case "2":
-            var10000 = "small developer";
+            literalText = "small developer";
             break;
          case "3":
-            var10000 = "evaluation";
+            literalText = "evaluation";
             break;
          default:
-            var10000 = null;
+            literalText = null;
       }
 
-      return var10000;
+      return literalText;
    }
 
    public static String hardwareId() {
       try {
-         byte[] var1 = Objects.requireNonNull(NetworkInterface.getByInetAddress(InetAddress.getLocalHost()).getHardwareAddress());
-         return Base64Codec.encodeToString(PinnedTrustManager.SHA256.digest(var1));
-      } catch (SocketException | UnknownHostException | NullPointerException var7) {
+         byte[] bytes = Objects.requireNonNull(NetworkInterface.getByInetAddress(InetAddress.getLocalHost()).getHardwareAddress());
+         return Base64Codec.encodeToString(PinnedTrustManager.SHA256.digest(bytes));
+      } catch (SocketException | UnknownHostException | NullPointerException failure) {
          try {
-            ArrayList var4 = new ArrayList();
-            Enumeration var2 = NetworkInterface.getNetworkInterfaces();
+            ArrayList interfacesWithAddresses = new ArrayList();
+            Enumeration networkInterfaces = NetworkInterface.getNetworkInterfaces();
 
-            while (var2.hasMoreElements()) {
-               NetworkInterface var3 = (NetworkInterface)var2.nextElement();
-               if (var3.getHardwareAddress() != null) {
-                  var4.add(var3);
+            while (networkInterfaces.hasMoreElements()) {
+               NetworkInterface networkInterface = (NetworkInterface)networkInterfaces.nextElement();
+               if (networkInterface.getHardwareAddress() != null) {
+                  interfacesWithAddresses.add(networkInterface);
                }
             }
 
-            Function<NetworkInterface, String> function5 = NetworkInterface::getName;
-            var4.sort(Comparator.comparing(function5));
-            return Base64Codec.encodeToString(PinnedTrustManager.SHA256.digest(((NetworkInterface)var4.get(0)).getHardwareAddress()));
-         } catch (SocketException var6) {
+            Function<NetworkInterface, String> nameMapper = NetworkInterface::getName;
+            interfacesWithAddresses.sort(Comparator.comparing(nameMapper));
+            return Base64Codec.encodeToString(PinnedTrustManager.SHA256.digest(((NetworkInterface)interfacesWithAddresses.get(0)).getHardwareAddress()));
+         } catch (SocketException socketFailure) {
             return null;
          }
       }
    }
 
    private static String activationParameters(String text, String text2) {
-      String value2;
+      String hostName;
       try {
-         value2 = InetAddress.getLocalHost().getHostName();
-      } catch (UnknownHostException var6) {
-         value2 = null;
+         hostName = InetAddress.getLocalHost().getHostName();
+      } catch (UnknownHostException unknownHostFailure) {
+         hostName = null;
       }
 
-      String value3 = System.getProperty("user.name");
-      String value4 = hardwareId();
-      String value5 = Jnic.class.getPackage().getImplementationVersion();
+      String property = System.getProperty("user.name");
+      String hardwareId = hardwareId();
+      String implementationVersion = Jnic.class.getPackage().getImplementationVersion();
       return "token="
          + URLEncoder.encode(text, StandardCharsets.UTF_8)
          + "&app_id="
          + URLEncoder.encode(text2, StandardCharsets.UTF_8)
          + "&machine="
-         + encodeParameter(value2)
+         + encodeParameter(hostName)
          + "&user="
-         + encodeParameter(value3)
+         + encodeParameter(property)
          + "&hwid="
-         + encodeParameter(value4)
+         + encodeParameter(hardwareId)
          + "&version="
-         + encodeParameter(value5);
+         + encodeParameter(implementationVersion);
    }
 
    private static String encodeParameter(String text) {
@@ -134,57 +134,57 @@ public class License {
 
    public static boolean activate(String text) {
       try {
-         SSLContext var1 = SSLContext.getInstance("TLS");
-         var1.init(null, new TrustManager[]{new PinnedTrustManager()}, new SecureRandom());
-         HttpsURLConnection.setDefaultSSLSocketFactory(var1.getSocketFactory());
-         HttpsURLConnection var4 = (HttpsURLConnection)new URL("https://activation.jnic.dev/api/activate").openConnection();
-         var4.setRequestMethod("POST");
-         var4.setDoOutput(true);
-         String[] var2 = text.split("/");
-         if (var2.length != 2) {
+         SSLContext instance = SSLContext.getInstance("TLS");
+         instance.init(null, new TrustManager[]{new PinnedTrustManager()}, new SecureRandom());
+         HttpsURLConnection.setDefaultSSLSocketFactory(instance.getSocketFactory());
+         HttpsURLConnection httpsURLConnection = (HttpsURLConnection)new URL("https://activation.jnic.dev/api/activate").openConnection();
+         httpsURLConnection.setRequestMethod("POST");
+         httpsURLConnection.setDoOutput(true);
+         String[] strings = text.split("/");
+         if (strings.length != 2) {
             throw new IOException("Invalid key format");
          }
 
-         byte[] var3 = activationParameters(var2[0], var2[1]).getBytes(StandardCharsets.UTF_8);
-         var4.setRequestProperty("Accept", "application/json");
-         var4.setFixedLengthStreamingMode(var3.length);
-         var4.setRequestProperty("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
-         var4.connect();
+         byte[] encodedBytes = activationParameters(strings[0], strings[1]).getBytes(StandardCharsets.UTF_8);
+         httpsURLConnection.setRequestProperty("Accept", "application/json");
+         httpsURLConnection.setFixedLengthStreamingMode(encodedBytes.length);
+         httpsURLConnection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
+         httpsURLConnection.connect();
 
-         try (OutputStream var8 = var4.getOutputStream()) {
-            var8.write(var3);
+         try (OutputStream outputStream = httpsURLConnection.getOutputStream()) {
+            outputStream.write(encodedBytes);
          }
 
-         if (var4.getResponseCode() == 201) {
-            JsonObject var9 = Json.parse(new InputStreamReader(var4.getInputStream())).asObject();
-            String value13 = var9.getString("result", "failure");
-            if (value13 == null) {
+         if (httpsURLConnection.getResponseCode() == 201) {
+            JsonObject jsonObject = Json.parse(new InputStreamReader(httpsURLConnection.getInputStream())).asObject();
+            String string = jsonObject.getString("result", "failure");
+            if (string == null) {
                throw new NullPointerException("");
             }
 
-            if (value13.equals("ok")) {
-               try (PrintWriter var6 = new PrintWriter(new FileOutputStream("jnic.licence", false))) {
-                  var6.print(text);
+            if (string.equals("ok")) {
+               try (PrintWriter printWriter = new PrintWriter(new FileOutputStream("jnic.licence", false))) {
+                  printWriter.print(text);
                }
 
                JnicLogger.INSTANCE.info("Successfully activated");
-               JnicLogger.INSTANCE.info("Remaining activations: " + var9.getString("remainingActivations", "N/A"));
+               JnicLogger.INSTANCE.info("Remaining activations: " + jsonObject.getString("remainingActivations", "N/A"));
                return true;
             }
          }
 
-         JsonObject var11 = Json.parse(new InputStreamReader(var4.getErrorStream())).asObject();
-         JnicLogger.INSTANCE.error("Activation failed: " + var11.getString("error", "unknown error"));
-         JsonValue var14 = var11.get("support_message");
-         if (var14 != null && !var14.isNull() && var14.isString()) {
-            JnicLogger.INSTANCE.error(var14.asString());
+         JsonObject jsonObject2 = Json.parse(new InputStreamReader(httpsURLConnection.getErrorStream())).asObject();
+         JnicLogger.INSTANCE.error("Activation failed: " + jsonObject2.getString("error", "unknown error"));
+         JsonValue jsonValue = jsonObject2.get("support_message");
+         if (jsonValue != null && !jsonValue.isNull() && jsonValue.isString()) {
+            JnicLogger.INSTANCE.error(jsonValue.asString());
          }
 
          return false;
-      } catch (GeneralSecurityException var19) {
+      } catch (GeneralSecurityException generalSecurityFailure) {
          JnicLogger.INSTANCE.error("Activation failed: security error");
          return false;
-      } catch (IOException var20) {
+      } catch (IOException ioFailure) {
          JnicLogger.INSTANCE.error("Activation failed: could not connect to licencing server");
          return false;
       }

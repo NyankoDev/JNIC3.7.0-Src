@@ -23,58 +23,58 @@ public class MethodDeclarationGenerator implements SourceGenerator {
    }
 
    public static String jniFunctionName(String text, String text2, String text3) {
-      String value3 = SourceText.encodeJniName(text);
-      String value4 = SourceText.encodeJniName(text2);
-      String value12 = "_";
-      String var14 = "Java_" + value3 + value12 + value4;
-      Type[] var15 = Type.getArgumentTypes(text3);
-      if (var15.length > 0) {
-         Stream<Type> stream24 = Arrays.stream(var15);
-         Function<Type, String> function25 = Type::getDescriptor;
-         String value23 = SourceText.encodeJniName(stream24.map(function25).collect(Collectors.joining(new String(""))));
-         return var14 + "__" + value23;
+      String encodedOwner = SourceText.encodeJniName(text);
+      String encodedMethod = SourceText.encodeJniName(text2);
+      String nameSeparator = "_";
+      String expression = "Java_" + encodedOwner + nameSeparator + encodedMethod;
+      Type[] argumentTypes = Type.getArgumentTypes(text3);
+      if (argumentTypes.length > 0) {
+         Stream<Type> stream24 = Arrays.stream(argumentTypes);
+         Function<Type, String> descriptorMapper = Type::getDescriptor;
+         String encodedArguments = SourceText.encodeJniName(stream24.map(descriptorMapper).collect(Collectors.joining(new String(""))));
+         return expression + "__" + encodedArguments;
       } else {
-         return var14;
+         return expression;
       }
    }
 
    @Override
    public String generate(CompilationContext context) {
-      Type var4 = Type.getReturnType(this.method.desc);
-      Type[] var3 = Type.getArgumentTypes(this.method.desc);
-      StringBuilder var2 = new StringBuilder();
-      String value12;
+      Type returnType = Type.getReturnType(this.method.desc);
+      Type[] argumentTypes = Type.getArgumentTypes(this.method.desc);
+      StringBuilder source = new StringBuilder();
+      String nativeType;
       if (this.functionName == null) {
-         var2.append("JNIEXPORT ");
-         value12 = JniTypes.nativeType(var4);
+         source.append("JNIEXPORT ");
+         nativeType = JniTypes.nativeType(returnType);
       } else {
-         value12 = JniTypes.nativeType(var4);
+         nativeType = JniTypes.nativeType(returnType);
       }
 
-      var2.append(value12);
-      var2.append(" JNICALL ");
-      String value13 = this.functionName();
-      var2.append(value13);
-      var2.append("(JNIEnv *env, jobject thisObj");
-      int var10000 = var3.length;
-      int var8 = 0;
-      int var6 = var10000;
+      source.append(nativeType);
+      source.append(" JNICALL ");
+      String functionName2 = this.functionName();
+      source.append(functionName2);
+      source.append("(JNIEnv *env, jobject thisObj");
+      int argumentTypeCount = argumentTypes.length;
+      int index = 0;
+      int argumentTypeCount2 = argumentTypeCount;
 
-      while (var8 < var6) {
-         var2.append(", ");
-         String value7 = JniTypes.nativeType(var3[var8]);
-         var2.append(value7);
-         var2.append(" arg");
-         var2.append(var8);
-         int var10 = var3.length;
-         var10000 = var8 + 1;
-         var6 = var10;
-         var8 = var10000;
+      while (index < argumentTypeCount2) {
+         source.append(", ");
+         String nativeType2 = JniTypes.nativeType(argumentTypes[index]);
+         source.append(nativeType2);
+         source.append(" arg");
+         source.append(index);
+         int argumentTypeCount3 = argumentTypes.length;
+         argumentTypeCount = index + 1;
+         argumentTypeCount2 = argumentTypeCount3;
+         index = argumentTypeCount;
       }
 
-      String value11 = ")";
-      var2.append(value11);
-      return var2.toString();
+      String closingParenthesis = ")";
+      source.append(closingParenthesis);
+      return source.toString();
    }
 
    private String functionName() {

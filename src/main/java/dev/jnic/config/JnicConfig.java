@@ -39,15 +39,15 @@ public class JnicConfig {
    }
 
    public boolean isIncluded(ClassNode owner, MethodNode method) {
-      String var3 = method.name;
-      if (var3 == null) {
+      String memberName = method.name;
+      if (memberName == null) {
          throw new NullPointerException("");
       }
 
-      if (!var3.equals("<init>")
+      if (!memberName.equals("<init>")
          && (owner.access & 512) == 0
          && (method.access & 1280) == 0
-         && ((owner.access & 16384) == 0 || !var3.equals("values"))
+         && ((owner.access & 16384) == 0 || !memberName.equals("values"))
          && (this.excludeAnnotation == null || !this.hasExcludeAnnotation(method))) {
          if (this.includeAnnotation == null || !this.hasIncludeAnnotation(method)) {
             if (this.excludeAnnotation != null && this.hasExcludeAnnotation(owner)) {
@@ -67,11 +67,11 @@ public class JnicConfig {
 
    private static boolean annotationPresent(List<AnnotationNode> list, String text) {
       if (list != null && !list.isEmpty()) {
-         Stream var10000 = list.stream();
-         String capturedValue2 = "L" + text + ";";
-         Stream<AnnotationNode> matchingValues = var10000;
-         Predicate<AnnotationNode> function4 = annotationNode -> annotationNode.desc.equals(capturedValue2);
-         return matchingValues.anyMatch(function4);
+         Stream stream = list.stream();
+         String annotationDescriptor = "L" + text + ";";
+         Stream<AnnotationNode> matchingValues = stream;
+         Predicate<AnnotationNode> matchesAnnotation = annotationNode -> annotationNode.desc.equals(annotationDescriptor);
+         return matchingValues.anyMatch(matchesAnnotation);
       } else {
          return false;
       }
@@ -94,24 +94,24 @@ public class JnicConfig {
    }
 
    private static boolean lambda$isIncluded$1(ClassNode owner, MethodNode method, MethodPattern methodPattern) {
-      String var3 = owner.name;
-      String var4 = method.name;
-      String var5 = method.desc;
-      return methodPattern.matches(var3, var4, var5);
+      String memberName = owner.name;
+      String memberName2 = method.name;
+      String descriptor = method.desc;
+      return methodPattern.matches(memberName, memberName2, descriptor);
    }
 
    private static boolean lambda$isIncluded$0(ClassNode owner, MethodNode method, MethodPattern methodPattern) {
-      String var3 = owner.name;
-      String var4 = method.name;
-      String var5 = method.desc;
-      return methodPattern.matches(var3, var4, var5);
+      String memberName = owner.name;
+      String memberName2 = method.name;
+      String descriptor = method.desc;
+      return methodPattern.matches(memberName, memberName2, descriptor);
    }
 
-   private static boolean matchesAny(List<MethodPattern> items0, ClassNode owner, MethodNode method) {
-      Iterator var3 = items0.iterator();
+   private static boolean matchesAny(List<MethodPattern> patterns, ClassNode owner, MethodNode method) {
+      Iterator iterator = patterns.iterator();
 
-      while (var3.hasNext()) {
-         if (((MethodPattern)var3.next()).matches(owner.name, method.name, method.desc)) {
+      while (iterator.hasNext()) {
+         if (((MethodPattern)iterator.next()).matches(owner.name, method.name, method.desc)) {
             return true;
          }
       }
@@ -168,8 +168,8 @@ public class JnicConfig {
 
    private void clearSelectionAnnotations(List<? extends AnnotationNode> annotations) {
       if (annotations != null) {
-         Predicate<AnnotationNode> function2 = annotation -> this.isSelectionType(annotation.desc.substring(1, annotation.desc.length() - 1));
-         annotations.removeIf(function2);
+         Predicate<AnnotationNode> predicate = annotation -> this.isSelectionType(annotation.desc.substring(1, annotation.desc.length() - 1));
+         annotations.removeIf(predicate);
       }
    }
 

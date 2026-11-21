@@ -77,103 +77,103 @@ public final class SourceText {
 
    public static String modifiedUtf8Literal(String text) {
       try (
-         ByteArrayOutputStream var1 = new ByteArrayOutputStream();
-         DataOutputStream var2 = new DataOutputStream(var1);
+         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+         DataOutputStream dataOutputStream = new DataOutputStream(byteArrayOutputStream);
       ) {
-         var2.writeUTF(text);
-         StringBuilder var3 = new StringBuilder();
+         dataOutputStream.writeUTF(text);
+         StringBuilder builder = new StringBuilder();
 
-         for (byte var7 : var1.toByteArray()) {
-            if (var7 > 31 && var7 <= 126) {
-               var3.append((char)var7);
+         for (byte byteValue : byteArrayOutputStream.toByteArray()) {
+            if (byteValue > 31 && byteValue <= 126) {
+               builder.append((char)byteValue);
             } else {
-               var3.append(String.format("\\%03o", var7));
+               builder.append(String.format("\\%03o", byteValue));
             }
          }
 
-         return var3.toString();
-      } catch (IOException var17) {
+         return builder.toString();
+      } catch (IOException ioFailure) {
          throw new AssertionError();
       }
    }
 
-   public static String methodDeclaration(int index, String text, String text2, String text3, List<String> items4) {
-      StringBuilder var5 = new StringBuilder();
-      if ((index & 1) != 0) {
-         var5.append("public ");
+   public static String methodDeclaration(int access, String methodName, String descriptor, String signature, List<String> exceptions) {
+      StringBuilder builder = new StringBuilder();
+      if ((access & 1) != 0) {
+         builder.append("public ");
       }
 
-      if ((index & 2) != 0) {
-         var5.append("private ");
+      if ((access & 2) != 0) {
+         builder.append("private ");
       }
 
-      if ((index & 4) != 0) {
-         var5.append("protected ");
+      if ((access & 4) != 0) {
+         builder.append("protected ");
       }
 
-      if ((index & 8) != 0) {
-         var5.append("static ");
+      if ((access & 8) != 0) {
+         builder.append("static ");
       }
 
-      if ((index & 16) != 0) {
-         var5.append("final ");
+      if ((access & 16) != 0) {
+         builder.append("final ");
       }
 
-      if ((index & 32) != 0) {
-         var5.append("synchronized ");
+      if ((access & 32) != 0) {
+         builder.append("synchronized ");
       }
 
-      if ((index & 256) != 0) {
-         var5.append("native ");
+      if ((access & 256) != 0) {
+         builder.append("native ");
       }
 
-      if ((index & 1024) != 0) {
-         var5.append("abstract ");
+      if ((access & 1024) != 0) {
+         builder.append("abstract ");
       }
 
-      if ((index & 2048) != 0) {
-         var5.append("strictfp ");
+      if ((access & 2048) != 0) {
+         builder.append("strictfp ");
       }
 
-      TraceSignatureVisitor var6 = new TraceSignatureVisitor(0);
-      new SignatureReader(text3 == null ? text2 : text3).accept(var6);
-      String value7 = var6.getDeclaration();
-      String value8 = var6.getReturnType();
-      if (value7.charAt(0) == '<') {
-         var5.append(value7, 0, value7.indexOf("(")).append(' ');
+      TraceSignatureVisitor traceSignatureVisitor = new TraceSignatureVisitor(0);
+      new SignatureReader(signature == null ? descriptor : signature).accept(traceSignatureVisitor);
+      String declaration = traceSignatureVisitor.getDeclaration();
+      String returnType = traceSignatureVisitor.getReturnType();
+      if (declaration.charAt(0) == '<') {
+         builder.append(declaration, 0, declaration.indexOf("(")).append(' ');
       }
 
-      if (value8.isEmpty() || value8.charAt(0) == '[') {
-         var5.append("java.lang.Object");
+      if (returnType.isEmpty() || returnType.charAt(0) == '[') {
+         builder.append("java.lang.Object");
       }
 
-      var5.append(value8).append(' ').append(text);
-      var5.append(value7, value7.indexOf(40), value7.length());
-      if ((index & 128) != 0 && value7.endsWith("[])")) {
-         var5.replace(var5.length() - 3, var5.length(), "...)");
+      builder.append(returnType).append(' ').append(methodName);
+      builder.append(declaration, declaration.indexOf(40), declaration.length());
+      if ((access & 128) != 0 && declaration.endsWith("[])")) {
+         builder.replace(builder.length() - 3, builder.length(), "...)");
       }
 
-      String value11 = var6.getExceptions();
-      if (value11 != null && !value11.isEmpty()) {
-         var5.append(" throws ").append(value11);
-      } else if (items4 != null && items4.size() > 0) {
-         var5.append(" throws ");
-         int var9 = var5.length();
+      String exceptions2 = traceSignatureVisitor.getExceptions();
+      if (exceptions2 != null && !exceptions2.isEmpty()) {
+         builder.append(" throws ").append(exceptions2);
+      } else if (exceptions != null && exceptions.size() > 0) {
+         builder.append(" throws ");
+         int exceptionsOffset = builder.length();
 
-         for (String var13 : items4) {
-            var5.append(var13).append(", ");
+         for (String exceptionType : exceptions) {
+            builder.append(exceptionType).append(", ");
          }
 
-         var5.setLength(var5.length() - 2);
+         builder.setLength(builder.length() - 2);
 
-         for (int var10 = var9; var10 < var5.length(); var10++) {
-            if (var5.charAt(var10) == '/') {
-               var5.setCharAt(var10, '.');
+         for (int exceptionsOffset2 = exceptionsOffset; exceptionsOffset2 < builder.length(); exceptionsOffset2++) {
+            if (builder.charAt(exceptionsOffset2) == '/') {
+               builder.setCharAt(exceptionsOffset2, '.');
             }
          }
       }
 
-      return var5.toString();
+      return builder.toString();
    }
 
    public static String classDeclaration(int access, String name, String parent, List<String> interfaces) {
@@ -213,45 +213,45 @@ public final class SourceText {
 
    private static void appendModifiers(StringBuilder stringBuilder, int index) {
       if (index != 0) {
-         int var2 = index;
+         int index2 = index;
 
          while (true) {
             label55: {
-               if ((0 - var2 & var2) > 15) {
-                  if ((0 - var2 & var2) == 16) {
+               if ((0 - index2 & index2) > 15) {
+                  if ((0 - index2 & index2) == 16) {
                      stringBuilder.append("final ");
-                     if (var2 - (0 - var2 & var2) == 0) {
+                     if (index2 - (0 - index2 & index2) == 0) {
                         break;
                      }
                      break label55;
                   }
 
-                  if ((0 - var2 & var2) == 512) {
+                  if ((0 - index2 & index2) == 512) {
                      stringBuilder.append("native ");
-                     if (var2 - (0 - var2 & var2) == 0) {
+                     if (index2 - (0 - index2 & index2) == 0) {
                         break;
                      }
                      break label55;
                   }
 
-                  if ((0 - var2 & var2) == 1024) {
+                  if ((0 - index2 & index2) == 1024) {
                      stringBuilder.append("abstract ");
-                     if (var2 - (0 - var2 & var2) == 0) {
+                     if (index2 - (0 - index2 & index2) == 0) {
                         break;
                      }
                      break label55;
                   }
-               } else if (Integer.compareUnsigned((0 - var2 & var2) - 1, 7) <= 0) {
-                  switch ((0 - var2 & var2) - 1) {
+               } else if (Integer.compareUnsigned((0 - index2 & index2) - 1, 7) <= 0) {
+                  switch ((0 - index2 & index2) - 1) {
                      case 0:
                         stringBuilder.append("public ");
-                        if (var2 - (0 - var2 & var2) == 0) {
+                        if (index2 - (0 - index2 & index2) == 0) {
                            return;
                         }
                         break label55;
                      case 1:
                         stringBuilder.append("private ");
-                        if (var2 - (0 - var2 & var2) == 0) {
+                        if (index2 - (0 - index2 & index2) == 0) {
                            return;
                         }
                         break label55;
@@ -262,13 +262,13 @@ public final class SourceText {
                         break;
                      case 3:
                         stringBuilder.append("protected ");
-                        if (var2 - (0 - var2 & var2) == 0) {
+                        if (index2 - (0 - index2 & index2) == 0) {
                            return;
                         }
                         break label55;
                      case 7:
                         stringBuilder.append("static ");
-                        if (var2 - (0 - var2 & var2) == 0) {
+                        if (index2 - (0 - index2 & index2) == 0) {
                            return;
                         }
                         break label55;
@@ -277,12 +277,12 @@ public final class SourceText {
                   }
                }
 
-               if (var2 - (0 - var2 & var2) == 0) {
+               if (index2 - (0 - index2 & index2) == 0) {
                   break;
                }
             }
 
-            var2 -= 0 - var2 & var2;
+            index2 -= 0 - index2 & index2;
          }
       }
    }

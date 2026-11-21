@@ -13,37 +13,37 @@ public class LocalVariableTransformer extends OpcodeTransformer {
 
    @Override
    public String transform(CompilationContext context, AbstractInsnNode instruction, OperandStack stack, JumpEmitter jumps, String ownerName) {
-      VarInsnNode var6 = (VarInsnNode)instruction;
-      int var7 = instruction.getOpcode();
-      boolean var8 = var7 >= 21 && var7 <= 25;
-      char var9 = localSlot(var7);
-      String var10 = "local" + var6.var + "." + var9;
-      String var11 = "stack" + (stack.sizeBefore() - Boolean.compare(!var8, false)) + "." + var9;
-      return var8 ? var11 + " = " + var10 + ";\n" : var10 + " = " + var11 + ";\n";
+      VarInsnNode localInstruction = (VarInsnNode)instruction;
+      int opcode = instruction.getOpcode();
+      boolean matches = opcode >= 21 && opcode <= 25;
+      char character = localSlot(opcode);
+      String expression = "local" + localInstruction.var + "." + character;
+      String expression2 = "stack" + (stack.sizeBefore() - Boolean.compare(!matches, false)) + "." + character;
+      return matches ? expression2 + " = " + expression + ";\n" : expression + " = " + expression2 + ";\n";
    }
 
    private static char localSlot(int index) {
-      char var10000;
+      char character;
       switch (index) {
          case 21:
          case 54:
-            var10000 = 'i';
+            character = 'i';
             break;
          case 22:
          case 55:
-            var10000 = 'j';
+            character = 'j';
             break;
          case 23:
          case 56:
-            var10000 = 'f';
+            character = 'f';
             break;
          case 24:
          case 57:
-            var10000 = 'd';
+            character = 'd';
             break;
          case 25:
          case 58:
-            var10000 = 'l';
+            character = 'l';
             break;
          case 26:
          case 27:
@@ -77,6 +77,6 @@ public class LocalVariableTransformer extends OpcodeTransformer {
             throw new AssertionError();
       }
 
-      return var10000;
+      return character;
    }
 }

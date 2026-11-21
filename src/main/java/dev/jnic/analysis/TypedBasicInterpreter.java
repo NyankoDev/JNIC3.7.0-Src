@@ -28,16 +28,16 @@ public class TypedBasicInterpreter extends BasicInterpreter {
                throw new ClassCastException("");
             }
 
-            Object var2 = ((LdcInsnNode)instruction).cst;
-            if (var2 instanceof String) {
+            Object constant = ((LdcInsnNode)instruction).cst;
+            if (constant instanceof String) {
                return new BasicValue(Type.getObjectType("java/lang/String"));
             }
 
-            if (var2 instanceof Type) {
-               return new BasicValue(Type.getObjectType(((Type)var2).getSort() == 11 ? "java/lang/invoke/MethodType" : "java/lang/Class"));
+            if (constant instanceof Type) {
+               return new BasicValue(Type.getObjectType(((Type)constant).getSort() == 11 ? "java/lang/invoke/MethodType" : "java/lang/Class"));
             }
 
-            if (var2 instanceof Handle) {
+            if (constant instanceof Handle) {
                return new BasicValue(Type.getObjectType("java/lang/invoke/MethodHandle"));
             }
          }

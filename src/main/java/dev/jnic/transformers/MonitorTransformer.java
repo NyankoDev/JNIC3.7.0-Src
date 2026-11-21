@@ -14,27 +14,27 @@ public class MonitorTransformer extends OpcodeTransformer {
 
    @Override
    public String transform(CompilationContext context, AbstractInsnNode instruction, OperandStack stack, JumpEmitter jumps, String ownerName) {
-      StringBuilder var7 = new StringBuilder();
+      StringBuilder source = new StringBuilder();
       if (instruction.getOpcode() == 194) {
-         String[] var16 = new String[1];
-         int var24 = stack.sizeBefore();
-         Type var25 = JniTypes.OBJECT_TYPE;
-         String value26 = JniTypes.stackVariable("stack", var24 - 1, var25);
-         var16[0] = value26;
-         String value27 = context.jniCall("MonitorEnter", var16);
-         var7.append(value27);
-         var7.append(";\n");
-         return var7.toString();
+         String[] callArguments = new String[1];
+         int stackSizeBefore = stack.sizeBefore();
+         Type objectType = JniTypes.OBJECT_TYPE;
+         String stackValue = JniTypes.stackVariable("stack", stackSizeBefore - 1, objectType);
+         callArguments[0] = stackValue;
+         String monitorEnterCall = context.jniCall("MonitorEnter", callArguments);
+         source.append(monitorEnterCall);
+         source.append(";\n");
+         return source.toString();
       } else {
-         String[] var28 = new String[1];
-         int var29 = stack.sizeBefore();
-         Type var30 = JniTypes.OBJECT_TYPE;
-         String value31 = JniTypes.stackVariable("stack", var29 - 1, var30);
-         var28[0] = value31;
-         String value32 = context.jniCall("MonitorExit", var28);
-         var7.append(value32);
-         var7.append(";\n");
-         return var7.toString();
+         String[] callArguments2 = new String[1];
+         int stackSizeBefore2 = stack.sizeBefore();
+         Type objectType2 = JniTypes.OBJECT_TYPE;
+         String stackValue2 = JniTypes.stackVariable("stack", stackSizeBefore2 - 1, objectType2);
+         callArguments2[0] = stackValue2;
+         String monitorExitCall = context.jniCall("MonitorExit", callArguments2);
+         source.append(monitorExitCall);
+         source.append(";\n");
+         return source.toString();
       }
    }
 }

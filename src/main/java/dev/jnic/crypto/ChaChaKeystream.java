@@ -24,23 +24,23 @@ public class ChaChaKeystream extends InputStream {
 
       this.key = key;
       this.nonce = nonce;
-      byte[] var7 = text.getBytes(StandardCharsets.US_ASCII);
-      if (var7.length != 16) {
+      byte[] magicBytes = text.getBytes(StandardCharsets.US_ASCII);
+      if (magicBytes.length != 16) {
          throw new IllegalArgumentException("invalid magic length");
       }
 
-      Pack.littleEndianToInt(var7, 0, this.state, 0, 4);
+      Pack.littleEndianToInt(magicBytes, 0, this.state, 0, 4);
       Pack.littleEndianToInt(key, 0, this.state, 4, 8);
       this.state[12] = 0;
       Pack.littleEndianToInt(nonce, 0, this.state, 13, 3);
    }
 
    public static ChaChaKeystream create(String text, SecureRandom secureRandom) {
-      byte[] var2 = new byte[32];
-      byte[] var3 = new byte[12];
-      secureRandom.nextBytes(var2);
-      secureRandom.nextBytes(var3);
-      return new ChaChaKeystream(text, var2, var3);
+      byte[] buffer = new byte[32];
+      byte[] buffer2 = new byte[12];
+      secureRandom.nextBytes(buffer);
+      secureRandom.nextBytes(buffer2);
+      return new ChaChaKeystream(text, buffer, buffer2);
    }
 
    public byte[] getKey() {
@@ -55,50 +55,50 @@ public class ChaChaKeystream extends InputStream {
    public int read(byte[] bytes, int index, int index2) {
       if (this.blockOffset >= 64) {
          this.generateBlock();
-         int[] var9 = this.state;
-         int var11 = var9[12]++;
+         int[] state2 = this.state;
+         int previousWord = state2[12]++;
          this.blockOffset = 0;
-         int var15 = this.blockOffset;
-         int var17 = Math.min(index2, 64 - var15);
-         int var21 = this.blockOffset;
-         System.arraycopy((Object)this.block, var21, (Object)bytes, index, var17);
-         int var24 = this.blockOffset;
-         this.blockOffset = var24 + var17;
-         int var27 = this.position;
-         this.position = var27 + var17;
-         return var17;
+         int blockOffset2 = this.blockOffset;
+         int readCount = Math.min(index2, 64 - blockOffset2);
+         int blockOffset3 = this.blockOffset;
+         System.arraycopy((Object)this.block, blockOffset3, (Object)bytes, index, readCount);
+         int blockOffset4 = this.blockOffset;
+         this.blockOffset = blockOffset4 + readCount;
+         int position2 = this.position;
+         this.position = position2 + readCount;
+         return readCount;
       } else {
-         int var8 = this.blockOffset;
-         int var10 = Math.min(index2, 64 - var8);
-         int var14 = this.blockOffset;
-         System.arraycopy((Object)this.block, var14, (Object)bytes, index, var10);
-         int var28 = this.blockOffset;
-         this.blockOffset = var28 + var10;
-         int var20 = this.position;
-         this.position = var20 + var10;
-         return var10;
+         int blockOffset5 = this.blockOffset;
+         int readCount2 = Math.min(index2, 64 - blockOffset5);
+         int blockOffset6 = this.blockOffset;
+         System.arraycopy((Object)this.block, blockOffset6, (Object)bytes, index, readCount2);
+         int blockOffset7 = this.blockOffset;
+         this.blockOffset = blockOffset7 + readCount2;
+         int position3 = this.position;
+         this.position = position3 + readCount2;
+         return readCount2;
       }
    }
 
    @Override
    public int read() {
-      int var3 = this.blockOffset;
-      if (64 <= var3) {
+      int blockOffset2 = this.blockOffset;
+      if (64 <= blockOffset2) {
          this.generateBlock();
-         int[] var6 = this.state;
-         int var8 = var6[12]++;
+         int[] state2 = this.state;
+         int previousWord = state2[12]++;
          this.blockOffset = 0;
-         int var12 = this.position++;
-         byte[] var21 = this.block;
-         int var17 = this.blockOffset++;
-         byte var20 = var21[var17];
-         return 0xFF & (var20 & 0xFF) << 24 >> 24;
+         int previousPosition = this.position++;
+         byte[] block2 = this.block;
+         int previousBlockOffset = this.blockOffset++;
+         byte byteValue = block2[previousBlockOffset];
+         return 0xFF & (byteValue & 0xFF) << 24 >> 24;
       } else {
-         int var5 = this.position++;
-         byte[] var10000 = this.block;
-         int var10 = this.blockOffset++;
-         byte var13 = var10000[var10];
-         return 0xFF & (var13 & 0xFF) << 24 >> 24;
+         int previousPosition2 = this.position++;
+         byte[] block3 = this.block;
+         int previousBlockOffset2 = this.blockOffset++;
+         byte byteValue2 = block3[previousBlockOffset2];
+         return 0xFF & (byteValue2 & 0xFF) << 24 >> 24;
       }
    }
 

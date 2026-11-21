@@ -7,9 +7,9 @@ public class TranslatedMethodIndex {
    private final Map<String, TranslatedClassMethods> classes = new HashMap<>();
 
    public void registerMethod(String className, String methodName, String descriptor) {
-      Map var10000 = this.classes;
-      TranslatedClassMethods var6 = new TranslatedClassMethods();
-      var10000.putIfAbsent((String)className, (TranslatedClassMethods)var6);
+      Map classes2 = this.classes;
+      TranslatedClassMethods translatedClassMethods = new TranslatedClassMethods();
+      classes2.putIfAbsent((String)className, (TranslatedClassMethods)translatedClassMethods);
       this.classes.get(className).methods.add((MethodSignature)(new MethodSignature(methodName, descriptor)));
    }
 

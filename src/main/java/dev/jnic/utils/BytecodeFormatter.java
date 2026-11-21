@@ -14,21 +14,21 @@ public class BytecodeFormatter {
 
    public static String format(AbstractInsnNode instruction) {
       if (instruction == null) {
-         String var3 = NULL_INSTRUCTION_MESSAGE;
-         throw new NullPointerException(var3);
+         String nullInstructionMessage = NULL_INSTRUCTION_MESSAGE;
+         throw new NullPointerException(nullInstructionMessage);
       } else {
-         TraceMethodVisitor var7 = VISITOR;
-         instruction.accept(var7);
-         StringWriter var6 = new StringWriter();
-         PRINTER.print(new PrintWriter(var6));
+         TraceMethodVisitor visitor = VISITOR;
+         instruction.accept(visitor);
+         StringWriter stringWriter = new StringWriter();
+         PRINTER.print(new PrintWriter(stringWriter));
          PRINTER.getText().clear();
-         return var6.toString().trim();
+         return stringWriter.toString().trim();
       }
    }
 
    static {
-      Textifier var1 = new Textifier();
-      PRINTER = var1;
-      VISITOR = new TraceMethodVisitor(var1);
+      Textifier textifier = new Textifier();
+      PRINTER = textifier;
+      VISITOR = new TraceMethodVisitor(textifier);
    }
 }

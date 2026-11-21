@@ -13,87 +13,87 @@ public class StackTransformer extends OpcodeTransformer {
       super(false, 87, 88, 89, 90, 91, 92, 93, 94, 95);
    }
 
-   private int saveStackValue(StringBuilder stringBuilder, int index, int index2, Type type) {
-      String value12 = JniTypes.stackVariable("temp", index2, type);
-      stringBuilder.append(value12);
-      stringBuilder.append(" = ");
-      String value29 = JniTypes.stackVariable("stack", index, type);
-      stringBuilder.append(value29);
-      stringBuilder.append(";\n    ");
+   private int saveStackValue(StringBuilder source, int stackIndex, int temporaryIndex, Type type) {
+      String temporaryValue = JniTypes.stackVariable("temp", temporaryIndex, type);
+      source.append(temporaryValue);
+      source.append(" = ");
+      String stackValue = JniTypes.stackVariable("stack", stackIndex, type);
+      source.append(stackValue);
+      source.append(";\n    ");
       return type.getSize();
    }
 
-   private void restoreStackValue(StringBuilder stringBuilder, int index, int index2, Type type) {
-      String value12 = JniTypes.stackVariable("stack", index, type);
-      stringBuilder.append(value12);
-      stringBuilder.append(" = ");
-      String value29 = JniTypes.stackVariable("temp", index2, type);
-      stringBuilder.append(value29);
-      stringBuilder.append(";\n    ");
+   private void restoreStackValue(StringBuilder source, int stackIndex, int temporaryIndex, Type type) {
+      String stackValue = JniTypes.stackVariable("stack", stackIndex, type);
+      source.append(stackValue);
+      source.append(" = ");
+      String temporaryValue = JniTypes.stackVariable("temp", temporaryIndex, type);
+      source.append(temporaryValue);
+      source.append(";\n    ");
    }
 
    @Override
    public String transform(CompilationContext context, AbstractInsnNode instruction, OperandStack stack, JumpEmitter jumps, String ownerName) {
-      int var9 = instruction.getOpcode();
-      if (var9 == 87 || var9 == 88) {
+      int opcode = instruction.getOpcode();
+      if (opcode == 87 || opcode == 88) {
          return "\n";
       }
 
-      if (var9 >= 89 && var9 <= 95) {
-         int var8 = stack.sizeBefore();
-         StringBuilder var6 = new StringBuilder();
-         if (var9 == 95) {
-            if (this.saveStackValue(var6, var8 - 1, 0, stack.typeBefore(var8 - 1)) == 1
-               && this.saveStackValue(var6, var8 - 2, 1, stack.typeBefore(var8 - 2)) == 1) {
-               this.restoreStackValue(var6, var8 - 2, 0, stack.typeAfter(var8 - 2));
-               this.restoreStackValue(var6, var8 - 1, 1, stack.typeAfter(var8 - 1));
-               return var6.toString();
+      if (opcode >= 89 && opcode <= 95) {
+         int stackSizeBefore = stack.sizeBefore();
+         StringBuilder source = new StringBuilder();
+         if (opcode == 95) {
+            if (this.saveStackValue(source, stackSizeBefore - 1, 0, stack.typeBefore(stackSizeBefore - 1)) == 1
+               && this.saveStackValue(source, stackSizeBefore - 2, 1, stack.typeBefore(stackSizeBefore - 2)) == 1) {
+               this.restoreStackValue(source, stackSizeBefore - 2, 0, stack.typeAfter(stackSizeBefore - 2));
+               this.restoreStackValue(source, stackSizeBefore - 1, 1, stack.typeAfter(stackSizeBefore - 1));
+               return source.toString();
             } else {
                throw new CompilationException("Illegal use of SWAP");
             }
          } else {
-            int var7 = var9 < 92 ? 1 : 2;
-            int var10 = (var9 - 89) % 3;
-            int var11 = this.saveWords(var6, stack, var8, 0, var7, var9);
-            int var13 = this.saveWords(var6, stack, var8, var11, var10, var9);
-            int var12 = var8 - var11 - var13;
+            int duplicatedWordCount = opcode < 92 ? 1 : 2;
+            int insertedWordCount = (opcode - 89) % 3;
+            int duplicatedValueCount = this.saveWords(source, stack, stackSizeBefore, 0, duplicatedWordCount, opcode);
+            int movedValueCount = this.saveWords(source, stack, stackSizeBefore, duplicatedValueCount, insertedWordCount, opcode);
+            int destinationIndex = stackSizeBefore - duplicatedValueCount - movedValueCount;
 
-            for (int var14 = var11 - 1; var14 >= 0; var14--) {
-               this.restoreStackValue(var6, var12, var14, stack.typeAfter(var12));
-               var12++;
+            for (int duplicateIndex = duplicatedValueCount - 1; duplicateIndex >= 0; duplicateIndex--) {
+               this.restoreStackValue(source, destinationIndex, duplicateIndex, stack.typeAfter(destinationIndex));
+               destinationIndex++;
             }
 
-            for (int var15 = var11 + var13 - 1; var15 >= var11; var15--) {
-               this.restoreStackValue(var6, var12, var15, stack.typeAfter(var12));
-               var12++;
+            for (int movedIndex = duplicatedValueCount + movedValueCount - 1; movedIndex >= duplicatedValueCount; movedIndex--) {
+               this.restoreStackValue(source, destinationIndex, movedIndex, stack.typeAfter(destinationIndex));
+               destinationIndex++;
             }
 
-            for (int var16 = var11 - 1; var16 >= 0; var16--) {
-               this.restoreStackValue(var6, var12, var16, stack.typeAfter(var12));
-               var12++;
+            for (int repeatIndex = duplicatedValueCount - 1; repeatIndex >= 0; repeatIndex--) {
+               this.restoreStackValue(source, destinationIndex, repeatIndex, stack.typeAfter(destinationIndex));
+               destinationIndex++;
             }
 
-            return var6.toString();
+            return source.toString();
          }
       } else {
          throw new AssertionError();
       }
    }
 
-   private int saveWords(StringBuilder stringBuilder, OperandStack stack, int index, int index2, int index3, int index4) {
-      int var7 = 0;
+   private int saveWords(StringBuilder source, OperandStack stack, int stackSize, int skipCount, int wordCount, int opcode) {
+      int savedValues = 0;
 
-      int var8;
-      for (var8 = 0; var8 < index3; var7++) {
-         int var9 = index2 + var7;
-         int var10 = index - 1 - var9;
-         var8 += this.saveStackValue(stringBuilder, var10, var9, stack.typeBefore(var10));
+      int savedWords;
+      for (savedWords = 0; savedWords < wordCount; savedValues++) {
+         int temporaryIndex = skipCount + savedValues;
+         int stackIndex = stackSize - 1 - temporaryIndex;
+         savedWords += this.saveStackValue(source, stackIndex, temporaryIndex, stack.typeBefore(stackIndex));
       }
 
-      if (var8 != index3) {
-         throw new CompilationException("Illegal use of " + new String[]{"DUP", "DUP_X1", "DUP_X2", "DUP2", "DUP2_X1", "DUP2_X2"}[index4 - 89]);
+      if (savedWords != wordCount) {
+         throw new CompilationException("Illegal use of " + new String[]{"DUP", "DUP_X1", "DUP_X2", "DUP2", "DUP2_X1", "DUP2_X2"}[opcode - 89]);
       } else {
-         return var7;
+         return savedValues;
       }
    }
 }

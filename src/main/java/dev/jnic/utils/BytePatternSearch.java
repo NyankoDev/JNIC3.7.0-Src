@@ -2,21 +2,21 @@ package dev.jnic.utils;
 
 public class BytePatternSearch {
    public static int indexOf(byte[] bytes, byte[] bytes2) {
-      int[] var3 = failureTable(bytes2);
-      int var4 = bytes.length;
-      int var5 = 0;
+      int[] words = failureTable(bytes2);
+      int byteCount = bytes.length;
+      int index = 0;
 
-      for (int var6 = 0; var6 < var4; var6++) {
-         while (var5 != 0 && bytes[var6] != bytes2[var5]) {
-            var5 = var3[var5 - 1];
+      for (int index2 = 0; index2 < byteCount; index2++) {
+         while (index != 0 && bytes[index2] != bytes2[index]) {
+            index = words[index - 1];
          }
 
-         if (bytes[var6] == bytes2[var5]) {
-            var5++;
+         if (bytes[index2] == bytes2[index]) {
+            index++;
          }
 
-         if (var5 == bytes2.length) {
-            return var6 + 1 - var5;
+         if (index == bytes2.length) {
+            return index2 + 1 - index;
          }
       }
 
@@ -24,21 +24,21 @@ public class BytePatternSearch {
    }
 
    private static int[] failureTable(byte[] bytes) {
-      int[] var1 = new int[bytes.length];
-      int var3 = 0;
+      int[] words = new int[bytes.length];
+      int index = 0;
 
-      for (int var4 = 1; var4 < bytes.length; var4++) {
-         while (var3 != 0 && bytes[var4] != bytes[var3]) {
-            var3 = var1[var3 - 1];
+      for (int index2 = 1; index2 < bytes.length; index2++) {
+         while (index != 0 && bytes[index2] != bytes[index]) {
+            index = words[index - 1];
          }
 
-         if (bytes[var4] == bytes[var3]) {
-            var3++;
+         if (bytes[index2] == bytes[index]) {
+            index++;
          }
 
-         var1[var4] = var3;
+         words[index2] = index;
       }
 
-      return var1;
+      return words;
    }
 }

@@ -14,36 +14,36 @@ public class ObjectGetClassIntrinsic extends IntrinsicTransformer {
 
    @Override
    public String transform(CompilationContext context, AbstractInsnNode instruction, OperandStack stack, JumpEmitter jumps, String ownerName) {
-      int var6 = stack.sizeBefore();
-      Type var14 = JniTypes.OBJECT_TYPE;
-      String value15 = JniTypes.stackVariable("stack", var6 - 1, var14);
-      StringBuilder var17 = new StringBuilder();
-      if (stack.mayBeNull(var6 - 1)) {
-         var17.append("if (");
-         var17.append(value15);
-         var17.append(" == NULL) ");
-         String[] var43 = new String[2];
-         String value52 = context.getClassCache().classReference("java/lang/NullPointerException");
-         var43[0] = value52;
-         var43[1] = "\"\"";
-         String var60 = "(void)(" + context.jniCall("ThrowNew", var43) + ")";
-         var17.append(var60);
-         var17.append(";\n    else ");
-         var17.append(value15);
-         var17.append(" = ");
-         String[] var94 = new String[]{value15};
-         String value95 = context.jniCall("GetObjectClass", var94);
-         var17.append(value95);
-         var17.append(";\n");
-         return var17.toString();
+      int stackSizeBefore = stack.sizeBefore();
+      Type objectType = JniTypes.OBJECT_TYPE;
+      String stackValue = JniTypes.stackVariable("stack", stackSizeBefore - 1, objectType);
+      StringBuilder builder = new StringBuilder();
+      if (stack.mayBeNull(stackSizeBefore - 1)) {
+         builder.append("if (");
+         builder.append(stackValue);
+         builder.append(" == NULL) ");
+         String[] callArguments = new String[2];
+         String classReference = context.getClassCache().classReference("java/lang/NullPointerException");
+         callArguments[0] = classReference;
+         callArguments[1] = "\"\"";
+         String expression = "(void)(" + context.jniCall("ThrowNew", callArguments) + ")";
+         builder.append(expression);
+         builder.append(";\n    else ");
+         builder.append(stackValue);
+         builder.append(" = ");
+         String[] callArguments2 = new String[]{stackValue};
+         String getObjectClassCall = context.jniCall("GetObjectClass", callArguments2);
+         builder.append(getObjectClassCall);
+         builder.append(";\n");
+         return builder.toString();
       } else {
-         var17.append(value15);
-         var17.append(" = ");
-         String[] var35 = new String[]{value15};
-         String value36 = context.jniCall("GetObjectClass", var35);
-         var17.append(value36);
-         var17.append(";\n");
-         return var17.toString();
+         builder.append(stackValue);
+         builder.append(" = ");
+         String[] callArguments3 = new String[]{stackValue};
+         String getObjectClassCall2 = context.jniCall("GetObjectClass", callArguments3);
+         builder.append(getObjectClassCall2);
+         builder.append(";\n");
+         return builder.toString();
       }
    }
 }

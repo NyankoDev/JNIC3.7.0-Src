@@ -18,8 +18,8 @@ public class PinnedTrustManager implements X509TrustManager {
 
    @Override
    public void checkServerTrusted(X509Certificate[] values, String text) throws CertificateException {
-      byte[] var9 = values[0].getPublicKey().getEncoded();
-      if (!Arrays.equals(Base64.getDecoder().decode("o8A6OI58AOvUceqqKfs+TkfmCEubXzhYtXLi1ZWm3zI="), SHA256.digest(var9))) {
+      byte[] encoded = values[0].getPublicKey().getEncoded();
+      if (!Arrays.equals(Base64.getDecoder().decode("o8A6OI58AOvUceqqKfs+TkfmCEubXzhYtXLi1ZWm3zI="), SHA256.digest(encoded))) {
          throw new CertificateException("bad certificate");
       }
    }
@@ -32,8 +32,8 @@ public class PinnedTrustManager implements X509TrustManager {
    static {
       try {
          SHA256 = MessageDigest.getInstance("SHA-256");
-      } catch (NoSuchAlgorithmException var1) {
-         throw new ExceptionInInitializerError(var1);
+      } catch (NoSuchAlgorithmException noSuchAlgorithmFailure) {
+         throw new ExceptionInInitializerError(noSuchAlgorithmFailure);
       }
    }
 }

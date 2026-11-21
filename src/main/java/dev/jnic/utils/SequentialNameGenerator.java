@@ -12,7 +12,7 @@ public class SequentialNameGenerator {
    }
 
    public String nextName() {
-      int var1 = this.nextId++;
-      return PREFIX + var1;
+      int previousNextId = this.nextId++;
+      return PREFIX + previousNextId;
    }
 }

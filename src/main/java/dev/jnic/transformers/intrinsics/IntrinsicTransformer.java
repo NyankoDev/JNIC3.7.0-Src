@@ -20,10 +20,10 @@ public abstract class IntrinsicTransformer implements InstructionTransformer {
    @Override
    public boolean accepts(AbstractInsnNode instruction) {
       if (instruction.getOpcode() == this.opcode && instruction instanceof MethodInsnNode) {
-         MethodInsnNode var2 = (MethodInsnNode)instruction;
-         if ((this.owner == null || var2.owner.equals(this.owner))
-            && (this.methodName == null || var2.name.equals(this.methodName))
-            && (this.descriptor == null || var2.desc.equals(this.descriptor))) {
+         MethodInsnNode invocation = (MethodInsnNode)instruction;
+         if ((this.owner == null || invocation.owner.equals(this.owner))
+            && (this.methodName == null || invocation.name.equals(this.methodName))
+            && (this.descriptor == null || invocation.desc.equals(this.descriptor))) {
             return true;
          }
       }
