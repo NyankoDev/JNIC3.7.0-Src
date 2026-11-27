@@ -4,9 +4,7 @@ import dev.jnic.compiler.CompilationContext;
 import dev.jnic.utils.JniTypes;
 import dev.jnic.utils.SourceText;
 import java.util.Arrays;
-import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.ClassNode;
 import org.objectweb.asm.tree.MethodNode;
@@ -22,59 +20,29 @@ public class MethodDeclarationGenerator implements SourceGenerator {
       this.functionName = functionName;
    }
 
-   public static String jniFunctionName(String text, String text2, String text3) {
-      String encodedOwner = SourceText.encodeJniName(text);
-      String encodedMethod = SourceText.encodeJniName(text2);
-      String nameSeparator = "_";
-      String expression = "Java_" + encodedOwner + nameSeparator + encodedMethod;
-      Type[] argumentTypes = Type.getArgumentTypes(text3);
-      if (argumentTypes.length > 0) {
-         Stream<Type> stream24 = Arrays.stream(argumentTypes);
-         Function<Type, String> descriptorMapper = Type::getDescriptor;
-         String encodedArguments = SourceText.encodeJniName(stream24.map(descriptorMapper).collect(Collectors.joining(new String(""))));
-         return expression + "__" + encodedArguments;
-      } else {
-         return expression;
+   public static String jniFunctionName(String ownerName, String methodName, String descriptor) {
+      String name = "Java_" + SourceText.encodeJniName(ownerName) + "_" + SourceText.encodeJniName(methodName);
+      Type[] argumentTypes = Type.getArgumentTypes(descriptor);
+      if (argumentTypes.length == 0) {
+         return name;
       }
+      String arguments = Arrays.stream(argumentTypes).map(Type::getDescriptor).collect(Collectors.joining());
+      return name + "__" + SourceText.encodeJniName(arguments);
    }
 
    @Override
    public String generate(CompilationContext context) {
-      Type returnType = Type.getReturnType(this.method.desc);
-      Type[] argumentTypes = Type.getArgumentTypes(this.method.desc);
       StringBuilder source = new StringBuilder();
-      String nativeType;
       if (this.functionName == null) {
          source.append("JNIEXPORT ");
-         nativeType = JniTypes.nativeType(returnType);
-      } else {
-         nativeType = JniTypes.nativeType(returnType);
       }
-
-      source.append(nativeType);
-      source.append(" JNICALL ");
-      String functionName2 = this.functionName();
-      source.append(functionName2);
-      source.append("(JNIEnv *env, jobject thisObj");
-      int argumentTypeCount = argumentTypes.length;
-      int index = 0;
-      int argumentTypeCount2 = argumentTypeCount;
-
-      while (index < argumentTypeCount2) {
-         source.append(", ");
-         String nativeType2 = JniTypes.nativeType(argumentTypes[index]);
-         source.append(nativeType2);
-         source.append(" arg");
-         source.append(index);
-         int argumentTypeCount3 = argumentTypes.length;
-         argumentTypeCount = index + 1;
-         argumentTypeCount2 = argumentTypeCount3;
-         index = argumentTypeCount;
+      source.append(JniTypes.nativeType(Type.getReturnType(this.method.desc))).append(" JNICALL ")
+         .append(this.functionName()).append("(JNIEnv *env, jobject thisObj");
+      Type[] argumentTypes = Type.getArgumentTypes(this.method.desc);
+      for (int argument = 0; argument < argumentTypes.length; argument++) {
+         source.append(", ").append(JniTypes.nativeType(argumentTypes[argument])).append(" arg").append(argument);
       }
-
-      String closingParenthesis = ")";
-      source.append(closingParenthesis);
-      return source.toString();
+      return source.append(')').toString();
    }
 
    private String functionName() {

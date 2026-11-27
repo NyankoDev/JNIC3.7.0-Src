@@ -1,5 +1,7 @@
 package dev.jnic.codegen;
 
+import static org.objectweb.asm.Opcodes.*;
+
 import dev.jnic.analysis.NullnessFrame;
 import dev.jnic.analysis.OperandStack;
 import dev.jnic.compiler.CompilationContext;
@@ -33,7 +35,7 @@ public class InstructionGenerator implements SourceGenerator {
    private final InstructionTransformer transformer;
 
    public InstructionGenerator(
-      AbstractInsnNode instruction, Frame before, Frame after, NullnessFrame nullness, JumpEmitter jumps, String ownerName, boolean enabled
+      AbstractInsnNode instruction, Frame<BasicValue> before, Frame<BasicValue> after, NullnessFrame nullness, JumpEmitter jumps, String ownerName, boolean enabled
    ) {
       this.instruction = instruction;
       this.before = before;
@@ -63,57 +65,28 @@ public class InstructionGenerator implements SourceGenerator {
    @Override
    public String generate(CompilationContext context) {
       StringBuilder source = new StringBuilder();
-      if (!JnicLogger.TRACE_ENABLED) {
-         InstructionTransformer transformer2 = this.transformer;
-         AbstractInsnNode instruction2 = this.instruction;
-         Frame before2 = this.before;
-         Frame after2 = this.after;
-         NullnessFrame nullness2 = this.nullness;
-         OperandStack stack = new OperandStack(before2, after2, nullness2);
-         JumpEmitter jumps2 = this.jumps;
-         String ownerName2 = this.ownerName;
-         String instructionSource = transformer2.transform(context, instruction2, stack, jumps2, ownerName2);
-         source.append(instructionSource);
-         return source.toString();
-      } else {
-         source.append("puts(\"[JNIC: exec ");
-         String diagnosticText = SourceText.diagnosticText(BytecodeFormatter.format(this.instruction));
-         source.append(diagnosticText);
-         source.append("]\");\n    ");
-         InstructionTransformer transformer3 = this.transformer;
-         AbstractInsnNode instruction3 = this.instruction;
-         Frame before3 = this.before;
-         Frame after3 = this.after;
-         NullnessFrame nullness3 = this.nullness;
-         OperandStack stack2 = new OperandStack(before3, after3, nullness3);
-         JumpEmitter jumps3 = this.jumps;
-         String ownerName3 = this.ownerName;
-         String instructionSource2 = transformer3.transform(context, instruction3, stack2, jumps3, ownerName3);
-         source.append(instructionSource2);
-         return source.toString();
+      if (JnicLogger.TRACE_ENABLED) {
+         source.append("puts(\"[JNIC: exec ")
+            .append(SourceText.diagnosticText(BytecodeFormatter.format(this.instruction)))
+            .append("]\");\n    ");
       }
+      OperandStack stack = new OperandStack(this.before, this.after, this.nullness);
+      return source.append(this.transformer.transform(context, this.instruction, stack, this.jumps, this.ownerName)).toString();
    }
 
    public boolean canThrow() {
       switch (this.instruction.getOpcode()) {
-         case 108:
-         case 109:
-         case 112:
-         case 113:
+         case IDIV:
+         case LDIV:
+         case IREM:
+         case LREM:
             return true;
-         case 110:
-         case 111:
          default:
             return this.transformer.canThrow();
       }
    }
 
    public boolean isReturn() {
-      InstructionTransformer transformer2 = this.transformer;
-      if (transformer2 == null) {
-         return false;
-      } else {
-         return transformer2 == null ? true : transformer2 instanceof ReturnTransformer;
-      }
+      return this.transformer instanceof ReturnTransformer;
    }
 }

@@ -15,88 +15,35 @@ class ConsoleLogHandler {
       this.timestampFormat = new SimpleDateFormat("HH-mm-ss.SSS");
    }
 
-   void log(int index, String text, String text2, Throwable throwable) {
-      StringBuilder builder;
-      label43: {
-         JnicLogger.getState();
-         builder = new StringBuilder(256);
-         String timestamp = this.timestampFormat.format(new Date());
-         builder.append(timestamp);
-         if (Integer.compareUnsigned(index - 1, 4) > 0) {
-            if (text == null) {
-               break label43;
-            }
-         } else {
-            switch (index - 1) {
-               case 0:
-                  builder.append(" TRACE: ");
-                  if (text == null) {
-                     break label43;
-                  }
-                  break;
-               case 1:
-                  builder.append(" DEBUG: ");
-                  if (text == null) {
-                     break label43;
-                  }
-                  break;
-               case 2:
-                  builder.append("  INFO: ");
-                  if (text == null) {
-                     break label43;
-                  }
-                  break;
-               case 3:
-                  builder.append("  WARN: ");
-                  if (text == null) {
-                     break label43;
-                  }
-                  break;
-               case 4:
-                  builder.append(" ERROR: ");
-                  if (text == null) {
-                     break label43;
-                  }
-                  break;
-               default:
-                  throw new AssertionError();
-            }
-         }
-
-         builder.append('[');
-         builder.append(text);
-         builder.append("] ");
-         builder.append(text2);
-         if (throwable == null) {
-            String generatedSource = builder.toString();
-            this.printLine(generatedSource);
-            return;
-         }
-
-         StringWriter stringWriter = new StringWriter(256);
-         PrintWriter printWriter = new PrintWriter(stringWriter);
-         throwable.printStackTrace(printWriter);
-         builder.append('\n');
-         String stackTraceText = stringWriter.toString().trim();
-         builder.append(stackTraceText);
-         String generatedSource2 = builder.toString();
-         this.printLine(generatedSource2);
-         return;
+   void log(int level, String tag, String message, Throwable cause) {
+      StringBuilder output = new StringBuilder(256);
+      output.append(this.timestampFormat.format(new Date())).append(levelPrefix(level));
+      if (tag != null) {
+         output.append('[').append(tag).append("] ");
       }
+      output.append(message);
+      if (cause != null) {
+         StringWriter trace = new StringWriter(256);
+         cause.printStackTrace(new PrintWriter(trace));
+         output.append('\n').append(trace.toString().trim());
+      }
+      this.printLine(output.toString());
+   }
 
-      builder.append(text2);
-      if (throwable == null) {
-         String generatedSource3 = builder.toString();
-         this.printLine(generatedSource3);
-      } else {
-         StringWriter stringWriter2 = new StringWriter(256);
-         PrintWriter printWriter2 = new PrintWriter(stringWriter2);
-         throwable.printStackTrace(printWriter2);
-         builder.append('\n');
-         String stackTraceText2 = stringWriter2.toString().trim();
-         builder.append(stackTraceText2);
-         String generatedSource4 = builder.toString();
-         this.printLine(generatedSource4);
+   private static String levelPrefix(int level) {
+      switch (level) {
+         case JnicLogger.LEVEL_TRACE:
+            return " TRACE: ";
+         case JnicLogger.LEVEL_DEBUG:
+            return " DEBUG: ";
+         case JnicLogger.LEVEL_INFO:
+            return "  INFO: ";
+         case JnicLogger.LEVEL_WARN:
+            return "  WARN: ";
+         case JnicLogger.LEVEL_ERROR:
+            return " ERROR: ";
+         default:
+            return "";
       }
    }
 

@@ -1,7 +1,10 @@
 package dev.jnic.codegen;
 
+import static org.objectweb.asm.Opcodes.ATHROW;
+
 import dev.jnic.analysis.NullnessAnalyzer;
 import dev.jnic.analysis.NullnessFrame;
+import dev.jnic.analysis.NullnessValue;
 import dev.jnic.analysis.TypedBasicInterpreter;
 import dev.jnic.compiler.CompilationContext;
 import dev.jnic.compiler.CompilationException;
@@ -26,6 +29,7 @@ import org.objectweb.asm.tree.MethodNode;
 import org.objectweb.asm.tree.TryCatchBlockNode;
 import org.objectweb.asm.tree.analysis.Analyzer;
 import org.objectweb.asm.tree.analysis.AnalyzerException;
+import org.objectweb.asm.tree.analysis.BasicValue;
 import org.objectweb.asm.tree.analysis.Frame;
 
 public class NativeMethodGenerator implements SourceGenerator {
@@ -40,7 +44,7 @@ public class NativeMethodGenerator implements SourceGenerator {
    }
 
    private Map<AbstractInsnNode, Integer> createDispatchTable() {
-      Set<AbstractInsnNode> blockStarts = new HashSet();
+      Set<AbstractInsnNode> blockStarts = new HashSet<>();
       blockStarts.add(this.method.instructions.getFirst());
 
       for (AbstractInsnNode currentInstruction : this.method.instructions) {
@@ -54,19 +58,19 @@ public class NativeMethodGenerator implements SourceGenerator {
       }
 
       int count = blockStarts.size() + ThreadLocalRandom.current().nextInt(blockStarts.size());
-      List dispatchKeys = IntStream.rangeClosed(-count, count).boxed().collect(Collectors.toList());
+      List<Integer> dispatchKeys = IntStream.rangeClosed(-count, count).boxed().collect(Collectors.toList());
       Collections.shuffle(dispatchKeys);
-      HashMap dispatchTable = new HashMap();
+      Map<AbstractInsnNode, Integer> dispatchTable = new HashMap<>();
 
       for (AbstractInsnNode currentInstruction2 : blockStarts) {
-         dispatchTable.put(currentInstruction2, (Integer)dispatchKeys.get(dispatchTable.size()));
+         dispatchTable.put(currentInstruction2, dispatchKeys.get(dispatchTable.size()));
       }
 
       return dispatchTable;
    }
 
    private Map<LabelNode, String> createLabels() {
-      HashMap labels = new HashMap();
+      Map<LabelNode, String> labels = new HashMap<>();
 
       for (AbstractInsnNode currentInstruction : this.method.instructions) {
          if (currentInstruction instanceof LabelNode) {
@@ -141,12 +145,12 @@ public class NativeMethodGenerator implements SourceGenerator {
    private String returnOnException(CompilationContext context) {
       Type returnType = Type.getReturnType(this.method.desc);
       return (JnicLogger.TRACE_ENABLED ? "puts(\"[JNIC: exception unhandled]\");" : "")
-         + (returnType.getSort() == 0 ? "        return;" : "        return " + JniTypes.stackVariable("temp", 0, returnType) + ";");
+         + (returnType.getSort() == Type.VOID ? "        return;" : "        return " + JniTypes.stackVariable("temp", 0, returnType) + ";");
    }
 
    @Override
    public String generate(CompilationContext context) {
-      Analyzer typeAnalyzer = new Analyzer<>(new TypedBasicInterpreter());
+      Analyzer<BasicValue> typeAnalyzer = new Analyzer<>(new TypedBasicInterpreter());
       NullnessAnalyzer nullnessAnalyzer = new NullnessAnalyzer();
 
       try {
@@ -157,16 +161,11 @@ public class NativeMethodGenerator implements SourceGenerator {
          throw new CompilationException(expression, analyzerFailure);
       }
 
-      Frame[] typeFrames = typeAnalyzer.getFrames();
-      Frame[] nullnessFrames = nullnessAnalyzer.getFrames();
+      Frame<BasicValue>[] typeFrames = typeAnalyzer.getFrames();
+      Frame<NullnessValue>[] nullnessFrames = nullnessAnalyzer.getFrames();
       StringBuilder source = new StringBuilder();
-      String functionName2 = this.functionName;
-      MethodNode method2 = this.method;
-      ClassNode declaringClass = this.owner;
-      source.append(new MethodDeclarationGenerator(declaringClass, method2, functionName2).generate(null)).append(" {\n");
-      MethodNode method3 = this.method;
-      String memberName = this.owner.name;
-      source.append(new LocalVariablesGenerator(memberName, method3).generate(null));
+      source.append(new MethodDeclarationGenerator(this.owner, this.method, this.functionName).generate(context)).append(" {\n");
+      source.append(new LocalVariablesGenerator(this.method).generate(context));
       if (JnicLogger.TRACE_ENABLED) {
          source.append("puts(\"[JNIC: begin ").append(SourceText.diagnosticText(this.owner.name + "#" + this.method.name + this.method.desc)).append("]\");\n");
       }
@@ -176,7 +175,7 @@ public class NativeMethodGenerator implements SourceGenerator {
       Map<LabelNode, String> labels = useDispatcher ? null : this.createLabels();
       if (useDispatcher) {
          source.append("    int flow = ")
-            .append(context.getLiterals().encryptedInteger((Integer)dispatchTable.get(this.method.instructions.getFirst())))
+            .append(context.getLiterals().encryptedInteger(dispatchTable.get(this.method.instructions.getFirst())))
             .append(";\n    dispatch:; switch (flow) {");
       }
 
@@ -187,7 +186,7 @@ public class NativeMethodGenerator implements SourceGenerator {
                source.append("    case ").append(dispatchTable.get(currentInstruction)).append(":\n");
             }
          } else if (currentInstruction instanceof LabelNode) {
-            source.append("    ").append((String)labels.get((LabelNode)currentInstruction)).append(":;\n");
+            source.append("    ").append(labels.get((LabelNode)currentInstruction)).append(":;\n");
          }
 
          if (currentInstruction.getOpcode() != -1) {
@@ -195,29 +194,22 @@ public class NativeMethodGenerator implements SourceGenerator {
             JumpEmitter jumpEmitter = useDispatcher
                ? (text, labelNode) -> dispatchJump(context, dispatchTable, nextDispatchKey, text, labelNode)
                : (text, labelNode) -> labelJump(labels, text, labelNode);
-            Frame frame = typeFrames[index];
-            Frame frame2 = index + 1 < typeFrames.length ? typeFrames[index + 1] : null;
-            NullnessFrame nullnessFrame = (NullnessFrame)nullnessFrames[index];
-            String memberName2 = this.owner.name;
-            boolean isIntrinsicsEnabled = context.getOptions().isIntrinsicsEnabled();
-            String memberName3 = memberName2;
-            JumpEmitter jumpEmitter2 = jumpEmitter;
-            NullnessFrame nullnessFrame2 = nullnessFrame;
-            Frame frame3 = frame2;
-            Frame frame4 = frame;
-            AbstractInsnNode currentInstruction2 = currentInstruction;
-            InstructionGenerator instructionGenerator = new InstructionGenerator(currentInstruction2, frame4, frame3, nullnessFrame2, jumpEmitter2, memberName3, isIntrinsicsEnabled);
+            Frame<BasicValue> before = typeFrames[index];
+            Frame<BasicValue> after = index + 1 < typeFrames.length ? typeFrames[index + 1] : null;
+            NullnessFrame nullness = (NullnessFrame)nullnessFrames[index];
+            InstructionGenerator instructionGenerator = new InstructionGenerator(
+               currentInstruction, before, after, nullness, jumpEmitter, this.owner.name, context.getOptions().isIntrinsicsEnabled());
             source.append("    ").append(instructionGenerator.generate(context));
             if (instructionGenerator.canThrow()) {
-               boolean opcodeIndex = currentInstruction.getOpcode() == 191;
-               if (!opcodeIndex) {
+               boolean isThrow = currentInstruction.getOpcode() == ATHROW;
+               if (!isThrow) {
                   source.append(useDispatcher ? "    if (" : "    if (__builtin_expect(");
                   source.append(context.jniCall("ExceptionCheck"));
                   source.append(useDispatcher ? ") {\n" : ", 0)) {\n");
                }
 
                source.append(this.emitExceptionHandlers(context, typeAnalyzer.getHandlers(index), jumpEmitter));
-               if (!opcodeIndex) {
+               if (!isThrow) {
                   source.append("    }\n");
                }
             }
@@ -231,12 +223,12 @@ public class NativeMethodGenerator implements SourceGenerator {
       return source.append('}').toString();
    }
 
-   private static String labelJump(Map<LabelNode, String> map, String text, LabelNode labelNode) {
-      return (text == null ? "" : "if (" + text + ") ") + "goto " + (String)map.get(labelNode) + ";";
+   private static String labelJump(Map<LabelNode, String> labels, String condition, LabelNode target) {
+      return (condition == null ? "" : "if (" + condition + ") ") + "goto " + labels.get(target) + ";";
    }
 
    private static String dispatchJump(CompilationContext context, Map<AbstractInsnNode, Integer> map, int index, String text, LabelNode labelNode) {
-      String encryptedValue = context.getLiterals().encryptedInteger((Integer)map.get(labelNode));
+      String encryptedValue = context.getLiterals().encryptedInteger(map.get(labelNode));
       return "1".equals(text)
          ? "flow = " + encryptedValue + "; goto dispatch;"
          : "flow = (" + text + ") ? " + encryptedValue + " : " + context.getLiterals().encryptedInteger(index) + "; goto dispatch;";

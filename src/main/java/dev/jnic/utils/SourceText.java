@@ -43,10 +43,6 @@ public final class SourceText {
       return result.toString();
    }
 
-   private static boolean isJniNameCharacter(char value) {
-      return value == '/' || value == '_' || 'a' <= value && value <= 'z' || 'A' <= value && value <= 'Z' || '0' <= value && value <= '9';
-   }
-
    public static String diagnosticText(String text) {
       StringBuilder result = new StringBuilder();
 
@@ -209,81 +205,5 @@ public final class SourceText {
       }
 
       return declaration.toString();
-   }
-
-   private static void appendModifiers(StringBuilder stringBuilder, int index) {
-      if (index != 0) {
-         int index2 = index;
-
-         while (true) {
-            label55: {
-               if ((0 - index2 & index2) > 15) {
-                  if ((0 - index2 & index2) == 16) {
-                     stringBuilder.append("final ");
-                     if (index2 - (0 - index2 & index2) == 0) {
-                        break;
-                     }
-                     break label55;
-                  }
-
-                  if ((0 - index2 & index2) == 512) {
-                     stringBuilder.append("native ");
-                     if (index2 - (0 - index2 & index2) == 0) {
-                        break;
-                     }
-                     break label55;
-                  }
-
-                  if ((0 - index2 & index2) == 1024) {
-                     stringBuilder.append("abstract ");
-                     if (index2 - (0 - index2 & index2) == 0) {
-                        break;
-                     }
-                     break label55;
-                  }
-               } else if (Integer.compareUnsigned((0 - index2 & index2) - 1, 7) <= 0) {
-                  switch ((0 - index2 & index2) - 1) {
-                     case 0:
-                        stringBuilder.append("public ");
-                        if (index2 - (0 - index2 & index2) == 0) {
-                           return;
-                        }
-                        break label55;
-                     case 1:
-                        stringBuilder.append("private ");
-                        if (index2 - (0 - index2 & index2) == 0) {
-                           return;
-                        }
-                        break label55;
-                     case 2:
-                     case 4:
-                     case 5:
-                     case 6:
-                        break;
-                     case 3:
-                        stringBuilder.append("protected ");
-                        if (index2 - (0 - index2 & index2) == 0) {
-                           return;
-                        }
-                        break label55;
-                     case 7:
-                        stringBuilder.append("static ");
-                        if (index2 - (0 - index2 & index2) == 0) {
-                           return;
-                        }
-                        break label55;
-                     default:
-                        throw new AssertionError();
-                  }
-               }
-
-               if (index2 - (0 - index2 & index2) == 0) {
-                  break;
-               }
-            }
-
-            index2 -= 0 - index2 & index2;
-         }
-      }
    }
 }
