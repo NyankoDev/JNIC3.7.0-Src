@@ -168,14 +168,18 @@ public class CompilationContext {
 
    public String jniCall(String name, String... arguments) {
       if (!allowsPending(name) && !name.equals("GetPrimitiveArrayCritical") && !name.equals("GetStringCritical")) {
-         String functionSignature = JniFunctionTypes.FUNCTION_TYPES.get(name);
-         if (functionSignature == null) {
+         String returnType = JniFunctionTypes.returnType(name);
+         if (returnType == null) {
             throw new IllegalArgumentException("Unknown JNI function: " + name);
          }
 
-         String returnType = functionSignature.substring(0, functionSignature.indexOf(" (JNICALL"));
          boolean hasReturnValue = !returnType.equals("void");
-         StringBuilder builder = new StringBuilder("({ ");
+         boolean requiresReceiver = requiresReceiver(name);
+         int capacity = 256 + arguments.length * 64 + (requiresReceiver ? 256 : 0);
+         for (String argument : arguments) {
+            capacity += argument == null ? 4 : argument.length();
+         }
+         StringBuilder builder = new StringBuilder(capacity).append("({ ");
          if (hasReturnValue) {
             builder.append(returnType).append(" jnic_result = 0; ");
          }
@@ -188,7 +192,7 @@ public class CompilationContext {
             builder.append("__auto_type ").append(callArguments[index]).append(" = (").append(arguments[index]).append("); ");
          }
 
-         if (requiresReceiver(name)) {
+         if (requiresReceiver) {
             builder.append("if (!(*env)->ExceptionCheck(env) && jnic_argument0 == NULL) { ")
                .append("jclass jnic_exception = (*env)->FindClass(env, \"java/lang/NullPointerException\"); ")
                .append("if (jnic_exception != NULL) { (*env)->ThrowNew(env, jnic_exception, \"\"); (*env)->DeleteLocalRef(env, jnic_exception); } } ");
@@ -199,7 +203,8 @@ public class CompilationContext {
             builder.append("jnic_result = ");
          }
 
-         builder.append(rawJniCall(name, callArguments)).append("; (*env)->ExceptionCheck(env); } } ");
+         appendRawJniCall(builder, name, callArguments);
+         builder.append("; (*env)->ExceptionCheck(env); } } ");
          return builder.append(hasReturnValue ? "jnic_result; })" : "(void)0; })").toString();
       } else {
          return rawJniCall(name, arguments);
@@ -275,11 +280,17 @@ public class CompilationContext {
    }
 
    private static String rawJniCall(String name, String[] arguments) {
-      StringBuilder call = new StringBuilder("(*env)->").append(name).append("(env");
+      StringBuilder call = new StringBuilder();
+      appendRawJniCall(call, name, arguments);
+      return call.toString();
+   }
+
+   private static void appendRawJniCall(StringBuilder call, String name, String[] arguments) {
+      call.append("(*env)->").append(name).append("(env");
       for (String argument : arguments) {
          call.append(", ").append(argument);
       }
-      return call.append(')').toString();
+      call.append(')');
    }
 
    private static boolean allowsPending(String text) {
@@ -294,6 +305,7 @@ public class CompilationContext {
    private static boolean requiresReceiver(String text) {
       return text.equals("GetArrayLength")
          || text.equals("GetObjectClass")
+         || text.equals("GetModule")
          || text.equals("MonitorEnter")
          || text.startsWith("GetString")
          || (text.startsWith("Get") || text.startsWith("Set")) && (text.contains("ArrayRegion") || text.contains("ArrayElement"))

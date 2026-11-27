@@ -10,6 +10,7 @@ import dev.jnic.codegen.NativeSourceGenerator;
 import dev.jnic.compiler.CompilationContext;
 import dev.jnic.compiler.CompilationPlan;
 import dev.jnic.compiler.TargetPlatform;
+import dev.jnic.compiler.ZigCompiler;
 import dev.jnic.config.JnicConfig;
 import dev.jnic.license.License;
 import dev.jnic.logging.JnicLogger;
@@ -33,18 +34,14 @@ import dev.jnic.transformers.SwitchTransformer;
 import dev.jnic.transformers.ThrowTransformer;
 import dev.jnic.transformers.TypeCheckTransformer;
 import dev.jnic.transformers.UnsupportedSubroutineTransformer;
-import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.lang.ProcessBuilder.Redirect;
-import java.lang.module.ModuleDescriptor.Version;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
-import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -56,11 +53,9 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.Map.Entry;
 import java.util.function.Consumer;
-import java.util.function.Predicate;
 import java.util.function.ToIntFunction;
 import java.util.stream.Stream;
 import org.objectweb.asm.ClassReader;
@@ -72,7 +67,6 @@ import org.tukaani.xz.FinishableWrapperOutputStream;
 import org.tukaani.xz.LZMA2Options;
 
 public final class Jnic {
-   private static final Version MINIMUM_ZIG_VERSION = Version.parse("0.10.1");
    public static final String CHACHA_MAGIC = new String(" jnic.dev v3.7.0");
    private static License license;
 
@@ -147,50 +141,22 @@ public final class Jnic {
       JnicLogger.INSTANCE.info(text);
    }
 
-   private static Path findCompiler() {
+   private static Path findCompiler() throws InterruptedException {
       try {
-         Stream compilerCandidates = Files.walk(Paths.get(Jnic.class.getProtectionDomain().getCodeSource().getLocation().toURI()).getParent(), 3);
-         Predicate<Path> regularFiles = path -> {
-            LinkOption[] linkOptions = new LinkOption[0];
-            return Files.isRegularFile(path, linkOptions);
-         };
-         compilerCandidates = compilerCandidates.filter(regularFiles);
-         Predicate<Path> executableFiles = Files::isExecutable;
-         compilerCandidates = compilerCandidates.filter(executableFiles);
-         Predicate<Path> compilerNames = path -> !path.endsWith("zig") ? path.endsWith("zig.exe") : true;
-         compilerCandidates = compilerCandidates.filter(compilerNames);
-         Predicate<Path> supportedCompilers = path -> {
-            try {
-               Process compilerProcess = Runtime.getRuntime().exec(new String[]{path.toString(), "version"});
-
-               try {
-                  Version compilerVersion = Version.parse(new BufferedReader(new InputStreamReader(compilerProcess.getInputStream())).readLine());
-                  if (MINIMUM_ZIG_VERSION.compareTo(compilerVersion) > 0) {
-                     throw new RuntimeException(compilerVersion + " older than minimum " + MINIMUM_ZIG_VERSION);
-                  } else {
-                     return compilerProcess.waitFor() == 0;
-                  }
-               } catch (RuntimeException versionFailure) {
-                  logCompilerWarning("Candidate " + path + ": " + versionFailure.getMessage());
-                  return false;
-               }
-            } catch (IOException | InterruptedException processFailure) {
-               return false;
-            }
-         };
-         Optional compiler = compilerCandidates.filter(supportedCompilers).findFirst();
-         if (compiler.isPresent()) {
-            logCompilerWarning("Found compiler: " + compiler.get());
-            return (Path)compiler.get();
-         } else {
-            logCompilerWarning(new String(""));
-            logCompilerWarning("Download the latest release of Zig for your platform");
-            logCompilerWarning("    https://ziglang.org/download/");
-            logCompilerWarning("Extract the archive into the same folder as JNIC");
-            logCompilerWarning(new String(""));
-            return null;
+         Path artifact = Paths.get(Jnic.class.getProtectionDomain().getCodeSource().getLocation().toURI());
+         Path directory = Files.isDirectory(artifact) ? artifact : artifact.getParent();
+         ZigCompiler compiler = ZigCompiler.find(directory);
+         if (compiler != null) {
+            logCompilerWarning("Found compiler: " + compiler.getExecutable() + " (Zig " + compiler.getVersion() + ")");
+            return compiler.getExecutable();
          }
-      } catch (URISyntaxException | IOException searchFailure) {
+         logCompilerWarning("");
+         logCompilerWarning("Download the latest release of Zig for your platform");
+         logCompilerWarning("    https://ziglang.org/download/");
+         logCompilerWarning("Extract it beside JNIC, add Zig to PATH, or set JNIC_ZIG to its executable");
+         logCompilerWarning("");
+         return null;
+      } catch (URISyntaxException | IOException | IllegalArgumentException searchFailure) {
          logCompilerSearchFailure("Error searching for compiler", searchFailure);
          return null;
       }

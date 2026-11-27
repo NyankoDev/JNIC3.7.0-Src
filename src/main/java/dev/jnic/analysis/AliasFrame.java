@@ -313,12 +313,20 @@ public class AliasFrame<V extends Value> extends Frame<V> {
       }
 
       System.arraycopy(((AliasFrame<?>)frame).aliases, 0, this.aliases, 0, this.aliases.length);
-      Map<AliasSet, AliasSet> copies = new HashMap<>();
+      Map<AliasSet, AliasSet> copies = null;
 
       for (int index = 0; index < this.aliases.length; index++) {
          AliasSet group = this.aliases[index];
          if (group != null) {
-            this.aliases[index] = group.size() == 1 ? null : copies.computeIfAbsent(group, AliasSet::copy);
+            AliasSet copy = copies == null ? null : copies.get(group);
+            if (copy == null && group.size() > 1) {
+               if (copies == null) {
+                  copies = new HashMap<>();
+               }
+               copy = group.copy();
+               copies.put(group, copy);
+            }
+            this.aliases[index] = copy;
          }
       }
 

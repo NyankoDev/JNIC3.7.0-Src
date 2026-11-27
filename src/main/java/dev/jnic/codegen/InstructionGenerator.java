@@ -64,13 +64,14 @@ public class InstructionGenerator implements SourceGenerator {
 
    @Override
    public String generate(CompilationContext context) {
-      StringBuilder source = new StringBuilder();
-      if (JnicLogger.TRACE_ENABLED) {
-         source.append("puts(\"[JNIC: exec ")
-            .append(SourceText.diagnosticText(BytecodeFormatter.format(this.instruction)))
-            .append("]\");\n    ");
-      }
       OperandStack stack = new OperandStack(this.before, this.after, this.nullness);
+      if (!JnicLogger.TRACE_ENABLED) {
+         return this.transformer.transform(context, this.instruction, stack, this.jumps, this.ownerName);
+      }
+      StringBuilder source = new StringBuilder();
+      source.append("puts(\"[JNIC: exec ")
+         .append(SourceText.diagnosticText(BytecodeFormatter.format(this.instruction)))
+         .append("]\");\n    ");
       return source.append(this.transformer.transform(context, this.instruction, stack, this.jumps, this.ownerName)).toString();
    }
 

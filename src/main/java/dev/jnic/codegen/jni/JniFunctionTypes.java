@@ -6,9 +6,14 @@ import java.util.Map;
 
 public class JniFunctionTypes {
    public static final Map<String, String> FUNCTION_TYPES;
+   private static final Map<String, String> RETURN_TYPES;
+
+   public static String returnType(String name) {
+      return RETURN_TYPES.get(name);
+   }
 
    static {
-      HashMap functionTypes = new HashMap();
+      Map<String, String> functionTypes = new HashMap<>();
       functionTypes.put("CallShortMethod", "jshort (JNICALL *) (JNIEnv *, jobject, jmethodID, ...)");
       functionTypes.put("CallFloatMethodV", "jfloat (JNICALL *) (JNIEnv *, jobject, jmethodID, va_list)");
       functionTypes.put("SetIntArrayRegion", "void (JNICALL *) (JNIEnv *, jintArray, jsize, jsize, const jint *)");
@@ -43,7 +48,7 @@ public class JniFunctionTypes {
       functionTypes.put("NewBooleanArray", "jbooleanArray (JNICALL *) (JNIEnv *, jsize)");
       functionTypes.put("GetBooleanField", "jboolean (JNICALL *) (JNIEnv *, jobject, jfieldID)");
       functionTypes.put("DeleteGlobalRef", "void (JNICALL *) (JNIEnv *, jobject)");
-      functionTypes.put("GetStringCritical", "jchar * (JNICALL *) (JNIEnv *, jstring, jboolean *)");
+      functionTypes.put("GetStringCritical", "const jchar * (JNICALL *) (JNIEnv *, jstring, jboolean *)");
       functionTypes.put("SetShortField", "void (JNICALL *) (JNIEnv *, jobject, jfieldID, jshort)");
       functionTypes.put("GetFieldID", "jfieldID (JNICALL *) (JNIEnv *, jclass, const char *, const char *)");
       functionTypes.put("CallStaticFloatMethod", "jfloat (JNICALL *) (JNIEnv *, jclass, jmethodID, ...)");
@@ -80,7 +85,7 @@ public class JniFunctionTypes {
       functionTypes.put("SetLongField", "void (JNICALL *) (JNIEnv *, jobject, jfieldID, jlong)");
       functionTypes.put("ToReflectedMethod", "jobject (JNICALL *) (JNIEnv *, jclass, jmethodID, jboolean)");
       functionTypes.put("CallNonvirtualByteMethodA", "jbyte (JNICALL *) (JNIEnv *, jobject, jclass, jmethodID, const jvalue *)");
-      functionTypes.put("GetStringUTFChars", "char* (JNICALL *) (JNIEnv *, jstring, jboolean *)");
+      functionTypes.put("GetStringUTFChars", "const char * (JNICALL *) (JNIEnv *, jstring, jboolean *)");
       functionTypes.put("ReleasePrimitiveArrayCritical", "void (JNICALL *) (JNIEnv *, jarray, void *, jint)");
       functionTypes.put("CallLongMethodV", "jlong (JNICALL *) (JNIEnv *, jobject, jmethodID, va_list)");
       functionTypes.put("GetStaticBooleanField", "jboolean (JNICALL *) (JNIEnv *, jclass, jfieldID)");
@@ -237,6 +242,13 @@ public class JniFunctionTypes {
       functionTypes.put("ExceptionDescribe", "void (JNICALL *) (JNIEnv *)");
       functionTypes.put("CallNonvirtualIntMethodA", "jint (JNICALL *) (JNIEnv *, jobject, jclass, jmethodID, const jvalue *)");
       functionTypes.put("PopLocalFrame", "jobject (JNICALL *) (JNIEnv *, jobject)");
+      functionTypes.put("GetObjectRefType", "jobjectRefType (JNICALL *) (JNIEnv *, jobject)");
+      functionTypes.put("GetModule", "jobject (JNICALL *) (JNIEnv *, jclass)");
+      functionTypes.put("IsVirtualThread", "jboolean (JNICALL *) (JNIEnv *, jobject)");
+      functionTypes.put("GetStringUTFLengthAsLong", "jlong (JNICALL *) (JNIEnv *, jstring)");
       FUNCTION_TYPES = Collections.unmodifiableMap(functionTypes);
+      Map<String, String> returnTypes = new HashMap<>();
+      functionTypes.forEach((name, signature) -> returnTypes.put(name, signature.substring(0, signature.indexOf(" (JNICALL"))));
+      RETURN_TYPES = Collections.unmodifiableMap(returnTypes);
    }
 }
